@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sunaiza's 1st Birthday</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="clouds" id="clouds"></div>
+    <div class="grass"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Our Little Butterfly Is Turning One</h1>
+            <h2 class="subtitle">Please join us to celebrate</h2>
+            <h2 class="subtitle" style="color: #FFD700; font-family: cursive; font-size: 2.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">Sunaiza's 1st Birthday!</h2>
+        </div>
+
+        <div class="photo-container">
+            <div class="rainbow">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <img src="assets/baby_img.png" alt="Sunaiza" class="photo" id="babyPhoto">
+        </div>
+
+        <div class="details">
+            <p class="date"><strong>Thursday, June 12, 2025</strong> | 7:00 PM</p>
+            <p class="venue">Venue: Green Lounge, Banglamotor</p>
+            <div class="countdown" id="countdown">Days until the celebration: loading...</div>
+            <p class="rsvp">Please RSVP by June 5, 2025</p>
+            <div style="margin-top: 20px;">
+                <a href="#" class="btn" id="rsvpBtn">RSVP Now</a>
+                <a href="#location" class="btn">View Location</a>
+            </div>
+        </div>
+
+        <div class="gallery">
+            <h3 class="gallery-title">Sunaiza's Journey</h3>
+            <img src="assets/1.jpg" alt="Month 1" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/2.jpg" alt="Month 2" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/3.jpg" alt="Month 3" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/4.jpg" alt="Month 4" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/5.jpg" alt="Month 5" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/6.jpg" alt="Month 6" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/7.jpg" alt="Month 7" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/8.jpg" alt="Month 8" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/9.jpg" alt="Month 9" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/10.jpg" alt="Month 10" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/11.jpg" alt="Month 11" class="gallery-photo" onclick="enlargePhoto(this)">
+            <img src="assets/12.jpg" alt="Month 12" class="gallery-photo" onclick="enlargePhoto(this)">
+        </div>
+
+        <div id="location" class="location-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d17371.83972767092!2d90.38345725260699!3d23.74811263132961!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8966da16441%3A0x4dc23e0775765432!2sThe%20Green%20Lounge!5e0!3m2!1sen!2sbd!4v1748426910629!5m2!1sen!2sbd"
+                    width="100%"
+                    height="100%"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+
+        <div class="dress-code-container">
+            <h3 class="section-title">Dress Code</h3>
+            <div class="dress-code-content">
+                <div class="dress-code-item">
+                    <h4>Her:</h4>
+                    <div class="dress-image-container">
+                        <img src="assets/dresscode/her.png" alt="Lavender dress for her">
+                    </div>
+                    <p>Lavender</p>
+                </div>
+                <div class="dress-code-item">
+                    <h4>His:</h4>
+                    <div class="dress-image-container">
+                        <img src="assets/dresscode/him.png" alt="White top and any color bottom for him">
+                    </div>
+                    <p>White top with any color bottom</p>
+                </div>
+            </div>
+            <p class="theme-text">Theme: <span>Butterfly</span></p>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photoModal" class="photo-modal" onclick="closeModal()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img id="modalImage" src="" alt="Enlarged photo">
+    </div>
+
+    <div class="footer">
+        <p>We can't wait to celebrate with you!</p>
+        <p style="margin-top: 10px; font-style: italic;">For any inquiries, please contact: parents@email.com</p>
+        <div class="footer-butterflies">
+            <img src="assets/butterflies/butterfly (1).png" alt="Footer Butterfly" class="footer-butterfly">
+            <img src="assets/butterflies/butterfly (3).png" alt="Footer Butterfly" class="footer-butterfly">
+        </div>
+    </div>
+
+    <img src="assets/butterflies/butterfly (1).png" alt="Butterfly" class="butterfly butterfly1">
+    <img src="assets/butterflies/butterfly (2).png" alt="Butterfly" class="butterfly butterfly2">
+    <img src="assets/butterflies/butterfly (3).png" alt="Butterfly" class="butterfly butterfly3">
+    <img src="assets/butterflies/butterfly (4).png" alt="Butterfly" class="butterfly butterfly4">
+    <img src="assets/butterflies/butterfly.png" alt="Butterfly" class="butterfly butterfly5">
+    <img src="assets/butterflies/butterfly (1).png" alt="Butterfly" class="butterfly butterfly6">
+    <img src="assets/butterflies/butterfly (2).png" alt="Butterfly" class="butterfly butterfly7">
+    <img src="assets/butterflies/butterfly (3).png" alt="Butterfly" class="butterfly butterfly8">
+    <img src="assets/butterflies/butterfly (4).png" alt="Butterfly" class="butterfly butterfly9">
+    <img src="assets/butterflies/butterfly.png" alt="Butterfly" class="butterfly butterfly10">
+
+    <script src="script.js"></script>
+</body>
+</html>
