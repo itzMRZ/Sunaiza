@@ -2,20 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#E11D48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Sunaiza's 1st Birthday">    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Join us to celebrate Sunaiza's 1st Birthday on June 12, 2025 at Green Lounge, Banglamotor. Butterfly themed party with dress code.">
+    <meta name="keywords" content="birthday party, first birthday, butterfly theme, celebration, Sunaiza">
+    <meta name="author" content="Sunaiza's Family">
     <title>Sunaiza's 1st Birthday</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">    <link rel="apple-touch-icon" href="favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preload" href="assets/baby_img.png" as="image">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="clouds" id="clouds"></div>
-    <div class="grass"></div>
-
-    <div class="container">
-        <div class="header">
-            <h1 class="title">Our Little Butterfly Is Turning One</h1>
-            <h2 class="subtitle">Please join us to celebrate</h2>
-            <h2 class="subtitle" style="color: #FFD700; font-family: cursive; font-size: 2.2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">Sunaiza's 1st Birthday!</h2>
-        </div>
+    <div class="grass"></div>    <div class="container">        <main id="main-content">
+            <div class="header">
+                <h1 class="title">Our Little Butterfly Is Turning One</h1>
+                <h2 class="subtitle">Please join us to celebrate</h2>
+                <h2 class="subtitle special-subtitle">Sunaiza's 1st Birthday!</h2>
+            </div>
 
         <div class="photo-container">
             <div class="rainbow">
@@ -34,27 +45,47 @@
             <p class="date"><strong>Thursday, June 12, 2025</strong> | 7:00 PM</p>
             <p class="venue">Venue: Green Lounge, Banglamotor</p>
             <div class="countdown" id="countdown">Days until the celebration: loading...</div>
-            <p class="rsvp">Please RSVP by June 5, 2025</p>
-            <div style="margin-top: 20px;">
-                <a href="#" class="btn" id="rsvpBtn">RSVP Now</a>
-                <a href="#location" class="btn">View Location</a>
+            <p class="rsvp">Please RSVP by June 5, 2025</p>            <div style="margin-top: 20px;">
+                <a href="#" class="btn" id="rsvpBtn" aria-label="RSVP for Sunaiza's birthday party">RSVP Now</a>
+                <a href="#location" class="btn" aria-label="View party location on map">View Location</a>
             </div>
-        </div>
-
-        <div class="gallery">
-            <h3 class="gallery-title">Sunaiza's Journey</h3>
-            <img src="assets/1.jpg" alt="Month 1" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/2.jpg" alt="Month 2" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/3.jpg" alt="Month 3" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/4.jpg" alt="Month 4" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/5.jpg" alt="Month 5" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/6.jpg" alt="Month 6" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/7.jpg" alt="Month 7" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/8.jpg" alt="Month 8" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/9.jpg" alt="Month 9" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/10.jpg" alt="Month 10" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/11.jpg" alt="Month 11" class="gallery-photo" onclick="enlargePhoto(this)">
-            <img src="assets/12.jpg" alt="Month 12" class="gallery-photo" onclick="enlargePhoto(this)">
+        </div>        <div class="gallery">
+            <h3 class="gallery-title">Sunaiza's Journey</h3>            <button class="gallery-item" data-src="assets/1.jpg" data-alt="Month 1" aria-label="View Month 1 photo">
+                <img src="assets/1.jpg" alt="Month 1" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/2.jpg" data-alt="Month 2" aria-label="View Month 2 photo">
+                <img src="assets/2.jpg" alt="Month 2" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/3.jpg" data-alt="Month 3" aria-label="View Month 3 photo">
+                <img src="assets/3.jpg" alt="Month 3" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/4.jpg" data-alt="Month 4" aria-label="View Month 4 photo">
+                <img src="assets/4.jpg" alt="Month 4" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/5.jpg" data-alt="Month 5" aria-label="View Month 5 photo">
+                <img src="assets/5.jpg" alt="Month 5" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/6.jpg" data-alt="Month 6" aria-label="View Month 6 photo">
+                <img src="assets/6.jpg" alt="Month 6" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/7.jpg" data-alt="Month 7" aria-label="View Month 7 photo">
+                <img src="assets/7.jpg" alt="Month 7" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/8.jpg" data-alt="Month 8" aria-label="View Month 8 photo">
+                <img src="assets/8.jpg" alt="Month 8" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/9.jpg" data-alt="Month 9" aria-label="View Month 9 photo">
+                <img src="assets/9.jpg" alt="Month 9" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/10.jpg" data-alt="Month 10" aria-label="View Month 10 photo">
+                <img src="assets/10.jpg" alt="Month 10" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/11.jpg" data-alt="Month 11" aria-label="View Month 11 photo">
+                <img src="assets/11.jpg" alt="Month 11" class="gallery-photo" loading="lazy">
+            </button>
+            <button class="gallery-item" data-src="assets/12.jpg" data-alt="Month 12" aria-label="View Month 12 photo">
+                <img src="assets/12.jpg" alt="Month 12" class="gallery-photo" loading="lazy">
+            </button>
         </div>
 
         <div id="location" class="location-map">
@@ -66,55 +97,47 @@
                     loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade">
             </iframe>
-        </div>
-
-        <div class="dress-code-container">
+        </div>        <div class="dress-code-container">
             <h3 class="section-title">Dress Code</h3>
-            <div class="dress-code-content">
-                <div class="dress-code-item">
+            <div class="dress-code-content">                <div class="dress-code-item">
                     <h4>Her:</h4>
                     <div class="dress-image-container">
-                        <img src="assets/dresscode/her.png" alt="Lavender dress for her">
+                        <img src="assets/dresscode/her.png" alt="Lavender dress for her" loading="lazy">
                     </div>
                     <p>Lavender</p>
                 </div>
                 <div class="dress-code-item">
                     <h4>His:</h4>
                     <div class="dress-image-container">
-                        <img src="assets/dresscode/him.png" alt="White top and any color bottom for him">
+                        <img src="assets/dresscode/him.png" alt="White top and any color bottom for him" loading="lazy">
                     </div>
                     <p>White top with any color bottom</p>
                 </div>
-            </div>
-            <p class="theme-text">Theme: <span>Butterfly</span></p>
+            </div>            <p class="theme-text">Theme: <span>Butterfly</span></p>
         </div>
-    </div>
-
-    <!-- Photo Modal -->
-    <div id="photoModal" class="photo-modal" onclick="closeModal()">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <img id="modalImage" src="" alt="Enlarged photo">
-    </div>
-
-    <div class="footer">
+        </main>
+    </div><!-- Photo Modal -->
+    <dialog id="photoModal" class="photo-modal" aria-labelledby="modalTitle" aria-describedby="modalDescription">
+        <button class="close-modal" aria-label="Close photo modal" type="button">&times;</button>
+        <img id="modalImage" src="" alt="">
+        <div id="modalTitle" class="sr-only">Photo viewer</div>
+        <div id="modalDescription" class="sr-only">Use the close button or tap outside to close</div>
+    </dialog><div class="footer">
         <p>We can't wait to celebrate with you!</p>
-        <p style="margin-top: 10px; font-style: italic;">For any inquiries, please contact: parents@email.com</p>
-        <div class="footer-butterflies">
-            <img src="assets/butterflies/butterfly (1).png" alt="Footer Butterfly" class="footer-butterfly">
-            <img src="assets/butterflies/butterfly (3).png" alt="Footer Butterfly" class="footer-butterfly">
+        <p class="contact-info">For any inquiries, please contact: parents@email.com</p>        <div class="footer-butterflies">
+            <img src="assets/butterflies/butterfly (1).png" alt="Footer Butterfly" class="footer-butterfly" loading="lazy">
+            <img src="assets/butterflies/butterfly (3).png" alt="Footer Butterfly" class="footer-butterfly" loading="lazy">
         </div>
-    </div>
-
-    <img src="assets/butterflies/butterfly (1).png" alt="Butterfly" class="butterfly butterfly1">
-    <img src="assets/butterflies/butterfly (2).png" alt="Butterfly" class="butterfly butterfly2">
-    <img src="assets/butterflies/butterfly (3).png" alt="Butterfly" class="butterfly butterfly3">
-    <img src="assets/butterflies/butterfly (4).png" alt="Butterfly" class="butterfly butterfly4">
-    <img src="assets/butterflies/butterfly.png" alt="Butterfly" class="butterfly butterfly5">
-    <img src="assets/butterflies/butterfly (1).png" alt="Butterfly" class="butterfly butterfly6">
-    <img src="assets/butterflies/butterfly (2).png" alt="Butterfly" class="butterfly butterfly7">
-    <img src="assets/butterflies/butterfly (3).png" alt="Butterfly" class="butterfly butterfly8">
-    <img src="assets/butterflies/butterfly (4).png" alt="Butterfly" class="butterfly butterfly9">
-    <img src="assets/butterflies/butterfly.png" alt="Butterfly" class="butterfly butterfly10">
+    </div>    <img src="assets/butterflies/butterfly (1).png" alt="Butterfly" class="butterfly butterfly1" loading="lazy">
+    <img src="assets/butterflies/butterfly (2).png" alt="Butterfly" class="butterfly butterfly2" loading="lazy">
+    <img src="assets/butterflies/butterfly (3).png" alt="Butterfly" class="butterfly butterfly3" loading="lazy">
+    <img src="assets/butterflies/butterfly (4).png" alt="Butterfly" class="butterfly butterfly4" loading="lazy">
+    <img src="assets/butterflies/butterfly.png" alt="Butterfly" class="butterfly butterfly5" loading="lazy">
+    <img src="assets/butterflies/butterfly (1).png" alt="Butterfly" class="butterfly butterfly6" loading="lazy">
+    <img src="assets/butterflies/butterfly (2).png" alt="Butterfly" class="butterfly butterfly7" loading="lazy">
+    <img src="assets/butterflies/butterfly (3).png" alt="Butterfly" class="butterfly butterfly8" loading="lazy">
+    <img src="assets/butterflies/butterfly (4).png" alt="Butterfly" class="butterfly butterfly9" loading="lazy">
+    <img src="assets/butterflies/butterfly.png" alt="Butterfly" class="butterfly butterfly10" loading="lazy">
 
     <script src="script.js"></script>
 </body>

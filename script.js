@@ -15,46 +15,64 @@ if (cloudsContainer) {
     }
 }
 
-// Update countdown
-function updateCountdown() {
+// Initialize countdown structure
+function initializeCountdown() {
     const countdownElement = document.getElementById('countdown');
     if (countdownElement) {
-        const eventDate = new Date('June 12, 2025 19:00:00').getTime();
-        const now = new Date().getTime();
-        const diff = eventDate - now;
-
-        if (diff > 0) {
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            // Format numbers with leading zeros
-            const formatTime = (num) => String(num).padStart(2, '0');
-
-            countdownElement.innerHTML = `
-                <div class="countdown-container">
-                    <div class="time-unit">
-                        <span class="time-number">${formatTime(days)}</span>
-                        <div class="time-label">DAYS</div>
-                    </div>
-                    <span class="colon">:</span>
-                    <div class="time-unit">
-                        <span class="time-number">${formatTime(hours)}</span>
-                        <div class="time-label">HOURS</div>
-                    </div>
-                    <span class="colon">:</span>
-                    <div class="time-unit">
-                        <span class="time-number">${formatTime(minutes)}</span>
-                        <div class="time-label">MINS</div>                    </div>
-                    <span class="colon">:</span>
-                    <div class="time-unit">
-                        <span class="time-number">${formatTime(seconds)}</span>
-                        <div class="time-label">SECS</div>
-                    </div>
+        countdownElement.innerHTML = `
+            <div class="countdown-container">
+                <div class="time-unit">
+                    <span class="time-number" data-time="days">00</span>
+                    <div class="time-label">DAYS</div>
                 </div>
-            `;
-        } else {
+                <span class="colon">:</span>
+                <div class="time-unit">
+                    <span class="time-number" data-time="hours">00</span>
+                    <div class="time-label">HOURS</div>
+                </div>
+                <span class="colon">:</span>
+                <div class="time-unit">
+                    <span class="time-number" data-time="minutes">00</span>
+                    <div class="time-label">MINS</div>
+                </div>
+                <span class="colon">:</span>
+                <div class="time-unit">
+                    <span class="time-number" data-time="seconds">00</span>
+                    <div class="time-label">SECS</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Update countdown - only updates the numbers, not the entire structure
+function updateCountdown() {
+    const eventDate = new Date('June 12, 2025 19:00:00').getTime();
+    const now = new Date().getTime();
+    const diff = eventDate - now;
+
+    if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        // Format numbers with leading zeros
+        const formatTime = (num) => String(num).padStart(2, '0');
+
+        // Update only the number elements
+        const daysElement = document.querySelector('[data-time="days"]');
+        const hoursElement = document.querySelector('[data-time="hours"]');
+        const minutesElement = document.querySelector('[data-time="minutes"]');
+        const secondsElement = document.querySelector('[data-time="seconds"]');
+
+        if (daysElement) daysElement.textContent = formatTime(days);
+        if (hoursElement) hoursElement.textContent = formatTime(hours);
+        if (minutesElement) minutesElement.textContent = formatTime(minutes);
+        if (secondsElement) secondsElement.textContent = formatTime(seconds);
+    } else {
+        const countdownElement = document.getElementById('countdown');
+        if (countdownElement) {
             countdownElement.innerHTML = `
                 <div style="background: linear-gradient(135deg, #FFB6C1, #FFC0CB); color: #FF1493; padding: 20px; border-radius: 20px; text-align: center; font-family: 'Comic Sans MS', cursive; font-size: 1.5rem; border: 3px solid #FF69B4;">
                     🎉 THE CELEBRATION IS TODAY! 🎉
@@ -64,6 +82,8 @@ function updateCountdown() {
     }
 }
 
+// Initialize countdown structure first, then start updating
+initializeCountdown();
 updateCountdown();
 setInterval(updateCountdown, 1000); // Update every second for smooth countdown
 
@@ -239,18 +259,22 @@ class ButterflyManager {
 
 // Initialize butterfly manager when DOM is loaded
 let butterflyManager;
+let entranceAnimationManager;
 
-// Initialize butterfly animation system
+// Initialize animation systems
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait for butterflies to be rendered
+    // Initialize entrance animations first
+    entranceAnimationManager = new EntranceAnimationManager();
+
+    // Wait for butterflies to be rendered, then start butterfly animations
     setTimeout(() => {
         butterflyManager = new ButterflyManager();
-    }, 100);
+    }, 300); // Slightly longer delay to let entrance animations settle
 });
 
 // Subtle mouse interaction for natural behavior
 document.addEventListener('mousemove', function(e) {
-    if (butterflyManager && butterflyManager.butterflies) {
+    if (butterflyManager?.butterflies) {
         const mouseX = e.clientX;
         const mouseY = e.clientY + window.pageYOffset;
 
@@ -272,13 +296,13 @@ document.addEventListener('mousemove', function(e) {
 });
 
 // Photo modal functionality
-function enlargePhoto(img) {
+function enlargePhoto(imageSrc, imageAlt) {
     const modal = document.getElementById('photoModal');
     const modalImg = document.getElementById('modalImage');
 
-    modal.style.display = 'flex';
-    modalImg.src = img.src;
-    modalImg.alt = img.alt;
+    modalImg.src = imageSrc;
+    modalImg.alt = imageAlt;
+    modal.showModal();
 
     // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
@@ -286,7 +310,7 @@ function enlargePhoto(img) {
 
 function closeModal() {
     const modal = document.getElementById('photoModal');
-    modal.style.display = 'none';
+    modal.close();
 
     // Restore body scroll
     document.body.style.overflow = 'auto';
@@ -299,10 +323,144 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Gallery event delegation
+document.addEventListener('DOMContentLoaded', function() {
+    const gallery = document.querySelector('.gallery');
+
+    if (gallery) {
+        gallery.addEventListener('click', function(e) {
+            const galleryItem = e.target.closest('.gallery-item');
+            if (galleryItem) {
+                e.preventDefault();
+                const imageSrc = galleryItem.dataset.src;
+                const imageAlt = galleryItem.dataset.alt;
+                enlargePhoto(imageSrc, imageAlt);
+            }
+        });
+
+        // Handle keyboard navigation for gallery items
+        gallery.addEventListener('keydown', function(e) {
+            const galleryItem = e.target.closest('.gallery-item');
+            if (galleryItem && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                const imageSrc = galleryItem.dataset.src;
+                const imageAlt = galleryItem.dataset.alt;
+                enlargePhoto(imageSrc, imageAlt);
+            }
+        });
+    }
+
+    // Modal event listeners
+    const modal = document.getElementById('photoModal');
+    const closeButton = modal?.querySelector('.close-modal');
+
+    if (modal) {
+        // Close when clicking on modal background
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener('click', closeModal);
+    }
+});
+
 // Make gallery items interactive (keep for any remaining placeholders)
 const placeholders = document.querySelectorAll('.placeholder');
 placeholders.forEach((placeholder, index) => {
     placeholder.addEventListener('click', function() {
         alert(`Photo for month ${index+1} would be displayed here.`);
     });
+});
+
+// Enhanced Entrance Animations with Intersection Observer
+class EntranceAnimationManager {
+    constructor() {
+        this.observedElements = new Set();
+        this.init();
+    }
+
+    init() {
+        // Create intersection observer for entrance animations
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !this.observedElements.has(entry.target)) {
+                    this.animateElement(entry.target);
+                    this.observedElements.add(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1, // Trigger when 10% of element is visible
+            rootMargin: '50px' // Start animation 50px before element enters viewport
+        });
+
+        this.setupAnimations();
+    }
+
+    setupAnimations() {
+        // Reset all elements to initial animation state
+        const animatedElements = document.querySelectorAll('.header, .photo-container, .details, .gallery, .dress-code-container');
+
+        animatedElements.forEach((element, index) => {
+            // Remove existing animation to prevent conflicts
+            element.style.animation = 'none';
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(50px)';
+            element.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            // Start observing the element
+            this.observer.observe(element);
+        });
+
+        // Special handling for gallery photos
+        const galleryPhotos = document.querySelectorAll('.gallery-photo');
+        galleryPhotos.forEach((photo, index) => {
+            photo.style.opacity = '0';
+            photo.style.transform = 'translateY(30px) scale(0.9)';
+            photo.style.transition = `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s`;
+            this.observer.observe(photo);
+        });
+    }
+
+    animateElement(element) {
+        // Add specific animations based on element type
+        if (element.classList.contains('header')) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        } else if (element.classList.contains('photo-container')) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) scale(1)';
+        } else if (element.classList.contains('details')) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        } else if (element.classList.contains('gallery')) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+
+            // Animate gallery photos with stagger
+            const photos = element.querySelectorAll('.gallery-photo');
+            photos.forEach((photo, index) => {
+                setTimeout(() => {
+                    photo.style.opacity = '1';
+                    photo.style.transform = 'translateY(0) scale(1)';
+                }, index * 100);
+            });
+        } else if (element.classList.contains('dress-code-container')) {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        } else if (element.classList.contains('gallery-photo')) {
+            // Individual gallery photo animation
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) scale(1)';
+        }
+    }
+}
+
+// Initialize entrance animation manager
+document.addEventListener('DOMContentLoaded', function() {
+    // EntranceAnimationManager is already initialized in the main initialization
+    console.log('Document loaded - animations initialized');
 });
