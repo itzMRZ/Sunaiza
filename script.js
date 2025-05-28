@@ -15,28 +15,28 @@ if (cloudsContainer) {
     }
 }
 
-// Initialize countdown structure
+// Initialize countdown structure with enhanced design
 function initializeCountdown() {
     const countdownElement = document.getElementById('countdown');
     if (countdownElement) {
         countdownElement.innerHTML = `
             <div class="countdown-container">
-                <div class="time-unit">
+                <div class="time-unit" id="days-unit">
                     <span class="time-number" data-time="days">00</span>
                     <div class="time-label">DAYS</div>
                 </div>
                 <span class="colon">:</span>
-                <div class="time-unit">
+                <div class="time-unit" id="hours-unit">
                     <span class="time-number" data-time="hours">00</span>
                     <div class="time-label">HOURS</div>
                 </div>
                 <span class="colon">:</span>
-                <div class="time-unit">
+                <div class="time-unit" id="minutes-unit">
                     <span class="time-number" data-time="minutes">00</span>
                     <div class="time-label">MINS</div>
                 </div>
                 <span class="colon">:</span>
-                <div class="time-unit">
+                <div class="time-unit" id="seconds-unit">
                     <span class="time-number" data-time="seconds">00</span>
                     <div class="time-label">SECS</div>
                 </div>
@@ -45,7 +45,7 @@ function initializeCountdown() {
     }
 }
 
-// Update countdown - only updates the numbers, not the entire structure
+// Enhanced countdown update with smooth transitions
 function updateCountdown() {
     const eventDate = new Date('June 12, 2025 19:00:00').getTime();
     const now = new Date().getTime();
@@ -60,32 +60,38 @@ function updateCountdown() {
         // Format numbers with leading zeros
         const formatTime = (num) => String(num).padStart(2, '0');
 
-        // Update only the number elements
-        const daysElement = document.querySelector('[data-time="days"]');
-        const hoursElement = document.querySelector('[data-time="hours"]');
-        const minutesElement = document.querySelector('[data-time="minutes"]');
-        const secondsElement = document.querySelector('[data-time="seconds"]');
+        // Update only the number elements with animation check
+        const timeUnits = [
+            { element: document.querySelector('[data-time="days"]'), value: formatTime(days), unitId: 'days-unit' },
+            { element: document.querySelector('[data-time="hours"]'), value: formatTime(hours), unitId: 'hours-unit' },
+            { element: document.querySelector('[data-time="minutes"]'), value: formatTime(minutes), unitId: 'minutes-unit' },
+            { element: document.querySelector('[data-time="seconds"]'), value: formatTime(seconds), unitId: 'seconds-unit' }
+        ];
 
-        if (daysElement) daysElement.textContent = formatTime(days);
-        if (hoursElement) hoursElement.textContent = formatTime(hours);
-        if (minutesElement) minutesElement.textContent = formatTime(minutes);
-        if (secondsElement) secondsElement.textContent = formatTime(seconds);
+        timeUnits.forEach(({ element, value, unitId }) => {
+            if (element && element.textContent !== value) {
+                // Add brief flash animation when value changes
+                const unit = document.getElementById(unitId);
+                if (unit) {
+                    unit.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        unit.style.transform = '';
+                    }, 150);
+                }
+                element.textContent = value;
+            }
+        });
     } else {
         const countdownElement = document.getElementById('countdown');
         if (countdownElement) {
             countdownElement.innerHTML = `
-                <div style="background: linear-gradient(135deg, #FFB6C1, #FFC0CB); color: #FF1493; padding: 20px; border-radius: 20px; text-align: center; font-family: 'Comic Sans MS', cursive; font-size: 1.5rem; border: 3px solid #FF69B4;">
+                <div style="background: linear-gradient(135deg, #FFE4E6, #FEF2F2); color: #DC2626; padding: clamp(20px, 4vw, 30px); border-radius: clamp(20px, 4vw, 28px); text-align: center; font-family: 'Fredoka', 'Nunito', sans-serif; font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 700; border: 3px solid #F87171; box-shadow: 0 12px 30px rgba(220, 38, 38, 0.2); animation: celebrationPulse 1s infinite alternate;">
                     🎉 THE CELEBRATION IS TODAY! 🎉
                 </div>
             `;
         }
     }
 }
-
-// Initialize countdown structure first, then start updating
-initializeCountdown();
-updateCountdown();
-setInterval(updateCountdown, 1000); // Update every second for smooth countdown
 
 // RSVP functionality
 const rsvpButton = document.getElementById('rsvpBtn');
@@ -104,79 +110,80 @@ class ButterflyManager {
             width: window.innerWidth,
             height: window.innerHeight
         };
-        this.scrollPosition = { x: 0, y: 0 };
-        this.init();
+        // REMOVED: scrollPosition as butterflies are now viewport-contained
+        this.origin = { x: this.viewport.width / 2, y: this.viewport.height / 2 }; // Default origin
+        // No call to this.init() here, will be called after DOM is ready
     }
 
     init() {
+        const babyContainer = document.querySelector('.photo-container');
+        if (babyContainer) {
+            const rect = babyContainer.getBoundingClientRect(); // Get viewport-relative coordinates
+            this.origin = {
+                x: rect.left + rect.width / 2, // X relative to viewport
+                y: rect.top + rect.height / 2  // Y relative to viewport
+            };
+        } else {
+            this.origin = {
+                x: this.viewport.width / 2,
+                y: this.viewport.height * 0.3
+            };
+            console.warn("Butterfly origin: '.photo-container' not found. Using fallback viewport center.");
+        }
         this.createButterflies();
         this.setupEventListeners();
         this.startAnimation();
-    }    createButterflies() {
+    }
+
+    createButterflies() {
         const butterflyElements = document.querySelectorAll('.butterfly');
+        const originX = this.origin.x;
+        const originY = this.origin.y;
 
         butterflyElements.forEach((element, index) => {
-            // Create predictable starting positions based on index
-            const startX = (this.viewport.width / (butterflyElements.length + 1)) * (index + 1);
-            const startY = this.viewport.height * (0.2 + (index % 3) * 0.3); // Three height levels
-
             const butterfly = {
                 element: element,
                 index: index,
-                x: startX,
-                y: startY,
-                vx: 0.2, // Consistent gentle velocity
-                vy: 0.1, // Consistent gentle velocity
-                baseSpeed: 0.3, // Consistent base speed for all butterflies
-                orbitalAngle: (index / butterflyElements.length) * Math.PI * 2, // Circular distribution
-                orbitalRadius: 100 + (index % 3) * 50, // Varying orbital sizes
-                centerX: startX,
-                centerY: startY,
-                phase: index * 0.5, // Staggered phases for variety
-                waveAmplitude: 20 + (index % 2) * 10, // Gentle wave motion
-                currentDirection: index % 2 === 0 ? 1 : -1, // Alternating directions
-                rotation: 0,
-                scale: 0.9, // Consistent scale
-                lastDirectionChange: Date.now(),
-                directionChangeInterval: 8000, // Consistent 8-second intervals
-                isResting: false,
-                restStartTime: 0
+                x: originX + (Math.random() - 0.5) * 20, // Start near origin (viewport relative)
+                y: originY + (Math.random() - 0.5) * 20, // Start near origin (viewport relative)
+                baseSpeed: 0.018 + Math.random() * 0.012, // Speed (0.018 to 0.03)
+                orbitalAngle: Math.random() * Math.PI * 2,
+                orbitalRadius: 50 + Math.random() * 70, // Orbits (50 to 120)
+                // centerX and centerY will now be relative to viewport and updated to stay within
+                centerX: this.viewport.width * (0.3 + Math.random() * 0.4), // Random initial center X in viewport
+                centerY: this.viewport.height * (0.3 + Math.random() * 0.4), // Random initial center Y in viewport
+                phase: Math.random() * Math.PI * 2,
+                waveAmplitude: 7 + Math.random() * 10, // Waves (7 to 17)
+                currentDirection: Math.random() < 0.5 ? 1 : -1,
+                rotation: Math.random() * 360,
+                scale: 0.045 + Math.random() * 0.02, // Scale (0.045 to 0.065)
+                lastDirectionChange: Date.now() - Math.random() * 10000,
+                directionChangeInterval: 10000 + Math.random() * 8000, // Change 10-18 seconds
             };
-
-            // Position butterfly initially
             this.positionButterfly(butterfly);
             this.butterflies.push(butterfly);
         });
     }
 
     setupEventListeners() {
-        // Update viewport on resize
         window.addEventListener('resize', () => {
             this.viewport.width = window.innerWidth;
             this.viewport.height = window.innerHeight;
+            // Re-evaluate butterfly positions or centers if needed on resize for strict viewport containment
+            this.butterflies.forEach(b => {
+                b.centerX = Math.min(Math.max(b.centerX, 0), this.viewport.width);
+                b.centerY = Math.min(Math.max(b.centerY, 0), this.viewport.height);
+            });
         });
 
-        // Track scroll for gravity effect
-        window.addEventListener('scroll', () => {
-            this.scrollPosition.y = window.pageYOffset;
-            this.updateGravity();
-        });
-    }    updateGravity() {
-        const centerX = this.viewport.width / 2;
-        const centerY = this.viewport.height / 2 + this.scrollPosition.y;
-
-        this.butterflies.forEach(butterfly => {
-            // Update orbital center to slowly drift toward viewport center
-            const driftSpeed = 0.001;
-            butterfly.centerX += (centerX - butterfly.centerX) * driftSpeed;
-            butterfly.centerY += (centerY - butterfly.centerY) * driftSpeed;
-        });
+        // REMOVED: Scroll event listener, as gravity is removed for viewport containment
     }
 
+    // REMOVED: updateGravity method
+
     positionButterfly(butterfly) {
-        // Allow full page positioning
-        const x = Math.max(0, Math.min(butterfly.x, this.viewport.width - 25));
-        const y = butterfly.y; // Allow Y to go beyond viewport for full page coverage
+        const x = butterfly.x;
+        const y = butterfly.y;
 
         butterfly.element.style.transform = `
             translate(${x}px, ${y}px)
@@ -185,64 +192,78 @@ class ButterflyManager {
         `;
         butterfly.element.style.left = '0px';
         butterfly.element.style.top = '0px';
-    }    updateButterfly(butterfly) {
+    }
+    updateButterfly(butterfly) {
         const now = Date.now();
-        const time = now * 0.001; // Convert to seconds
+        const time = now * 0.0007; // Time factor for wave motion, slightly faster
 
-        // Periodic direction changes (every 8 seconds)
         if (now - butterfly.lastDirectionChange > butterfly.directionChangeInterval) {
-            butterfly.currentDirection *= -1; // Simply reverse direction
+            butterfly.currentDirection *= (Math.random() < 0.6 ? 1 : -1);
             butterfly.lastDirectionChange = now;
+            butterfly.orbitalRadius = (50 + Math.random() * 70) * (0.8 + Math.random() * 0.4);
+            // Pick a new target orbital center within the viewport
+            butterfly.centerX = this.viewport.width * (0.1 + Math.random() * 0.8); // Target X within 10-90% of viewport
+            butterfly.centerY = this.viewport.height * (0.1 + Math.random() * 0.8); // Target Y within 10-90% of viewport
         }
 
-        // Calculate smooth orbital movement
-        butterfly.orbitalAngle += butterfly.currentDirection * butterfly.baseSpeed * 0.01;
+        butterfly.orbitalAngle += butterfly.currentDirection * butterfly.baseSpeed * 0.18; // Adjusted speed factor
 
-        // Create figure-8 or circular patterns
         const orbitalX = Math.cos(butterfly.orbitalAngle) * butterfly.orbitalRadius;
-        const orbitalY = Math.sin(butterfly.orbitalAngle * 2) * (butterfly.orbitalRadius * 0.5); // Figure-8 effect
+        const orbitalY = Math.sin(butterfly.orbitalAngle) * butterfly.orbitalRadius;
 
-        // Add gentle wave motion
-        const waveX = Math.sin(time * 0.5 + butterfly.phase) * butterfly.waveAmplitude;
-        const waveY = Math.cos(time * 0.3 + butterfly.phase) * (butterfly.waveAmplitude * 0.5);
+        const waveSpeedFactor = 0.5 + Math.random() * 0.25;
+        const waveX = Math.sin(time * waveSpeedFactor + butterfly.phase) * butterfly.waveAmplitude;
+        const waveY = Math.cos(time * waveSpeedFactor + butterfly.phase) * (butterfly.waveAmplitude * 0.5);
 
-        // Calculate target position
-        const targetX = butterfly.centerX + orbitalX + waveX;
-        const targetY = butterfly.centerY + orbitalY + waveY;
+        let targetX = butterfly.centerX + orbitalX + waveX;
+        let targetY = butterfly.centerY + orbitalY + waveY;
 
-        // Smooth movement toward target
-        const moveSpeed = 0.02;
-        butterfly.x += (targetX - butterfly.x) * moveSpeed;
-        butterfly.y += (targetY - butterfly.y) * moveSpeed;
+        // Gentle random drift of the main orbital center (centerX, centerY) - keep it subtle
+        // butterfly.centerX += (Math.random() - 0.5) * 0.1; // Reduced drift
+        // butterfly.centerY += (Math.random() - 0.5) * 0.1; // Reduced drift
 
-        // Update velocity for rotation calculation
-        butterfly.vx = (targetX - butterfly.x) * moveSpeed;
-        butterfly.vy = (targetY - butterfly.y) * moveSpeed;
+        const moveSpeed = 0.012 + Math.random() * 0.008; // (0.012 to 0.020) - slightly faster lerp
+        let dx = targetX - butterfly.x;
+        let dy = targetY - butterfly.y;
 
-        // Keep butterflies within reasonable bounds
-        const margin = 100;
+        butterfly.x += dx * moveSpeed;
+        butterfly.y += dy * moveSpeed;
+
+        let currentVx = dx * moveSpeed;
+        let currentVy = dy * moveSpeed;
+
+        // Viewport Containment (Bounce/Wrap within viewport)
+        const margin = 10; // Small margin from edge
+        const vpWidth = this.viewport.width;
+        const vpHeight = this.viewport.height;
+
+        // If butterfly hits edge, reverse direction and place it back inside margin
         if (butterfly.x < margin) {
-            butterfly.centerX += 2;
-        } else if (butterfly.x > this.viewport.width - margin) {
-            butterfly.centerX -= 2;
+            butterfly.x = margin;
+            butterfly.centerX += Math.abs(dx) + 20; // Nudge orbital center away from edge
+        } else if (butterfly.x > vpWidth - margin) {
+            butterfly.x = vpWidth - margin;
+            butterfly.centerX -= Math.abs(dx) + 20; // Nudge orbital center away from edge
         }
 
         if (butterfly.y < margin) {
-            butterfly.centerY += 2;
-        } else if (butterfly.y > this.viewport.height + this.scrollPosition.y - margin) {
-            butterfly.centerY -= 2;
+            butterfly.y = margin;
+            butterfly.centerY += Math.abs(dy) + 20; // Nudge orbital center away from edge
+        } else if (butterfly.y > vpHeight - margin) {
+            butterfly.y = vpHeight - margin;
+            butterfly.centerY -= Math.abs(dy) + 20; // Nudge orbital center away from edge
         }
 
-        // Smooth rotation based on movement direction
-        if (Math.abs(butterfly.vx) > 0.01 || Math.abs(butterfly.vy) > 0.01) {
-            const targetAngle = Math.atan2(butterfly.vy, butterfly.vx) * (180 / Math.PI);
-            butterfly.rotation += (targetAngle - butterfly.rotation) * 0.05;
+        // Ensure orbital centers also stay roughly within viewport to guide butterflies back
+        butterfly.centerX = Math.min(Math.max(butterfly.centerX, margin * 2), vpWidth - margin * 2);
+        butterfly.centerY = Math.min(Math.max(butterfly.centerY, margin * 2), vpHeight - margin * 2);
+
+
+        if (Math.abs(currentVx) > 0.01 || Math.abs(currentVy) > 0.01) {
+            const targetAngle = Math.atan2(currentVy, currentVx) * (180 / Math.PI);
+            butterfly.rotation += (targetAngle - butterfly.rotation) * 0.06; // Slightly faster rotation adjustment
         }
 
-        // Gentle wing flutter
-        butterfly.scale = 0.9 + Math.sin(time * 3 + butterfly.phase) * 0.05;
-
-        // Position the butterfly
         this.positionButterfly(butterfly);
     }
 
@@ -263,13 +284,23 @@ let entranceAnimationManager;
 
 // Initialize animation systems
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize countdown
+    initializeCountdown();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
     // Initialize entrance animations first
     entranceAnimationManager = new EntranceAnimationManager();
+    // entranceAnimationManager.setupAnimations(); // This is called inside its constructor if designed that way, or explicitly if not.
+                                                // Assuming setupAnimations is called by its constructor or an init method.
 
-    // Wait for butterflies to be rendered, then start butterfly animations
+    // Initialize ButterflyManager and call its init method
+    butterflyManager = new ButterflyManager();
     setTimeout(() => {
-        butterflyManager = new ButterflyManager();
-    }, 300); // Slightly longer delay to let entrance animations settle
+        if (butterflyManager) {
+            butterflyManager.init(); // Call init here to ensure DOM is ready for origin calculation
+        }
+    }, 350); // Slightly increased delay to ensure .photo-container is definitely laid out
 });
 
 // Subtle mouse interaction for natural behavior
@@ -278,18 +309,17 @@ document.addEventListener('mousemove', function(e) {
         const mouseX = e.clientX;
         const mouseY = e.clientY + window.pageYOffset;
 
-        // Add very gentle mouse influence
         butterflyManager.butterflies.forEach((butterfly, index) => {
             const dx = mouseX - butterfly.x;
             const dy = mouseY - butterfly.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Gentle center shifting when mouse is near
-            if (distance < 150 && distance > 0) {
-                const influenceStrength = ((150 - distance) / 150) * 0.3;
-                // Slightly shift the orbital center away from mouse
-                butterfly.centerX += -(dx / distance) * influenceStrength;
-                butterfly.centerY += -(dy / distance) * influenceStrength;
+            // Gentle nudge when mouse is very near
+            if (distance < 75 && distance > 0) { // MODIFIED: Smaller distance for influence
+                const influenceStrength = ((75 - distance) / 75) * 0.05; // MODIFIED: Much weaker influence
+                // Directly nudge position very slightly away from mouse
+                butterfly.x -= (dx / distance) * influenceStrength;
+                butterfly.y -= (dy / distance) * influenceStrength;
             }
         });
     }
@@ -379,88 +409,107 @@ placeholders.forEach((placeholder, index) => {
 // Enhanced Entrance Animations with Intersection Observer
 class EntranceAnimationManager {
     constructor() {
-        this.observedElements = new Set();
-        this.init();
-    }
-
-    init() {
-        // Create intersection observer for entrance animations
-        this.observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !this.observedElements.has(entry.target)) {
-                    this.animateElement(entry.target);
-                    this.observedElements.add(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1, // Trigger when 10% of element is visible
-            rootMargin: '50px' // Start animation 50px before element enters viewport
-        });
-
-        this.setupAnimations();
+        this.animatedElements = [];
+        this.observer = null;
+        // console.log("EntranceAnimationManager initialized");
     }
 
     setupAnimations() {
-        // Reset all elements to initial animation state
-        const animatedElements = document.querySelectorAll('.header, .photo-container, .details, .gallery, .dress-code-container');
+        // console.log("Setting up entrance animations...");
+        this.animatedElements = document.querySelectorAll('.section-title, .intro-text, .event-details p, .countdown-container, .button-group button, .dress-code-item, .footer p, .gallery-photo'); // MODIFIED: Re-added .gallery-photo for entrance animation
 
-        animatedElements.forEach((element, index) => {
-            // Remove existing animation to prevent conflicts
-            element.style.animation = 'none';
-            element.style.opacity = '0';
-            element.style.transform = 'translateY(50px)';
-            element.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        const options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
 
-            // Start observing the element
+        this.observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // console.log(`Animating element: ${entry.target.classList}`);
+                    this.animateElement(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+
+        this.animatedElements.forEach(element => {
+            // Temporarily hide gallery photos if they are part of the animation
+            if (element.classList.contains('gallery-photo')) {
+                element.style.opacity = '0'; // Ensure they start hidden if animated
+            }
             this.observer.observe(element);
         });
 
-        // Special handling for gallery photos
-        const galleryPhotos = document.querySelectorAll('.gallery-photo');
-        galleryPhotos.forEach((photo, index) => {
-            photo.style.opacity = '0';
-            photo.style.transform = 'translateY(30px) scale(0.9)';
-            photo.style.transition = `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s`;
-            this.observer.observe(photo);
+        // Handle elements that might already be in view on load
+        this.animatedElements.forEach(element => {
+            if (this.isElementInViewport(element) && !element.classList.contains('animated')) {
+                // console.log(`Animating immediately (already in view): ${element.classList}`);
+                this.animateElement(element);
+                if (this.observer) { // Check if observer exists before unobserving
+                    this.observer.unobserve(element);
+                }
+            }
         });
+
+        // Special handling for gallery photos if we are NOT animating them via IntersectionObserver
+        // This section was for debugging the scroll glitch by making them visible immediately.
+        // If gallery photos are now animated (added back to animatedElements), this might be redundant or conflict.
+        /*
+        const galleryPhotos = document.querySelectorAll('.gallery-photo');
+        galleryPhotos.forEach(photo => {
+            photo.style.opacity = '1'; // Make them visible immediately
+            photo.style.transform = 'translateY(0) scale(1)'; // Reset any animation transforms
+        });
+        */
+    }
+
+    isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
     }
 
     animateElement(element) {
         // Add specific animations based on element type
         if (element.classList.contains('header')) {
             element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
+            element.style.transform = 'translateY(0) scale(1)'; // MODIFIED
         } else if (element.classList.contains('photo-container')) {
             element.style.opacity = '1';
-            element.style.transform = 'translateY(0) scale(1)';
+            element.style.transform = 'translateY(0) scale(1)'; // MODIFIED
         } else if (element.classList.contains('details')) {
             element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
+            element.style.transform = 'translateY(0) scale(1)'; // MODIFIED
         } else if (element.classList.contains('gallery')) {
             element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
+            element.style.transform = 'translateY(0) scale(1)';
 
-            // Animate gallery photos with stagger
-            const photos = element.querySelectorAll('.gallery-photo');
-            photos.forEach((photo, index) => {
-                setTimeout(() => {
-                    photo.style.opacity = '1';
-                    photo.style.transform = 'translateY(0) scale(1)';
-                }, index * 100);
-            });
+            // REMOVED: Commented out staggered animation for gallery photos
+            // as individual photos are handled by IntersectionObserver.
         } else if (element.classList.contains('dress-code-container')) {
             element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
+            element.style.transform = 'translateY(0) scale(1)'; // MODIFIED
         } else if (element.classList.contains('gallery-photo')) {
-            // Individual gallery photo animation
+            // console.log("Animating gallery photo");
+            element.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
             element.style.opacity = '1';
             element.style.transform = 'translateY(0) scale(1)';
+            element.classList.add('animated');
+        } else {
+            // Default animation for other elements
+            // console.log("Animating default element");
+            element.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) scale(1)'; // Keep a slight scale for a subtle effect
+            element.classList.add('animated');
         }
     }
 }
 
 // Initialize entrance animation manager
-document.addEventListener('DOMContentLoaded', function() {
-    // EntranceAnimationManager is already initialized in the main initialization
-    console.log('Document loaded - animations initialized');
-});
