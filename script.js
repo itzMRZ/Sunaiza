@@ -114,9 +114,8 @@ class ButterflyManager {
         // REMOVED: scrollPosition as butterflies are now viewport-contained
         this.origin = { x: this.viewport.width / 2, y: this.viewport.height / 2 }; // Default origin
         // No call to this.init() here, will be called after DOM is ready
-    }
-
-    init() {
+    }    init() {
+        console.log('Initializing ButterflyManager...');
         const babyContainer = document.querySelector('.photo-container');
         if (babyContainer) {
             const rect = babyContainer.getBoundingClientRect(); // Get viewport-relative coordinates
@@ -134,20 +133,24 @@ class ButterflyManager {
         this.createButterflies();
         this.setupEventListeners();
         this.startAnimation();
-    }
-
-    createButterflies() {
+        console.log(`Initialized ${this.butterflies.length} butterflies`);
+    }createButterflies() {
         const butterflyElements = document.querySelectorAll('.butterfly');
         // REMOVED: originX and originY as starting points will be more varied.
 
         butterflyElements.forEach((element, index) => {
+            // Check if mobile for adjusted positioning
+            const isMobile = this.viewport.width <= 768;
+
             // Determine starting side: left (true) or right (false)
             const startFromLeftSide = Math.random() < 0.5;
             let startX;
             if (startFromLeftSide) {
-                startX = (Math.random() * -0.2 - 0.05) * this.viewport.width; // Start off-screen left (-5% to -25%)
+                const offScreenRange = isMobile ? 0.1 : 0.2; // Smaller off-screen range on mobile
+                startX = (Math.random() * -offScreenRange - 0.05) * this.viewport.width; // Start off-screen left
             } else {
-                startX = (1.05 + Math.random() * 0.2) * this.viewport.width; // Start off-screen right (105% to 125%)
+                const offScreenRange = isMobile ? 0.1 : 0.2; // Smaller off-screen range on mobile
+                startX = (1.05 + Math.random() * offScreenRange) * this.viewport.width; // Start off-screen right
             }
             const startY = Math.random() * this.viewport.height; // Random Y position within viewport height
 
@@ -160,18 +163,17 @@ class ButterflyManager {
                 orbitalAngle: Math.random() * Math.PI * 2,
                 orbitalRadius: 60 + Math.random() * 80, // Orbits (60 to 140) - increased range
                 // centerX and centerY will now be relative to viewport and updated to stay within
-                centerX: this.viewport.width * (0.2 + Math.random() * 0.6), // Target X within 20-80% of viewport
-                centerY: this.viewport.height * (0.2 + Math.random() * 0.6), // Target Y within 20-80% of viewport
+                centerX: this.viewport.width * (isMobile ? 0.25 : 0.2) + Math.random() * (this.viewport.width * (isMobile ? 0.5 : 0.6)), // Adjusted for mobile
+                centerY: this.viewport.height * (isMobile ? 0.25 : 0.2) + Math.random() * (this.viewport.height * (isMobile ? 0.5 : 0.6)), // Adjusted for mobile
                 phase: Math.random() * Math.PI * 2,
                 waveAmplitude: 8 + Math.random() * 12, // Waves (8 to 20) - increased range
                 currentDirection: Math.random() < 0.5 ? 1 : -1,
                 rotation: Math.random() * 360,
-                scale: 0.04 + Math.random() * 0.03, // Scale (0.04 to 0.07) - slightly increased max
+                scale: isMobile ? (0.06 + Math.random() * 0.02) : (0.04 + Math.random() * 0.03), // Slightly larger on mobile for visibility
                 lastDirectionChange: Date.now() - Math.random() * 12000,
                 directionChangeInterval: 12000 + Math.random() * 10000 // Change 12-22 seconds - increased interval
-            };
-            this.positionButterfly(butterfly);
-            butterfly.element.style.opacity = '1'; // Make butterfly visible after initial setup
+            };            this.positionButterfly(butterfly);
+            butterfly.element.style.opacity = '0.8'; // Make butterfly visible with proper opacity
             this.butterflies.push(butterfly);
         });
     }
@@ -203,8 +205,7 @@ class ButterflyManager {
         `;
         butterfly.element.style.left = '0px';
         butterfly.element.style.top = '0px';
-    }
-    updateButterfly(butterfly) {
+    }    updateButterfly(butterfly) {
         const now = Date.now();
         const time = now * 0.0006; // Time factor for wave motion, slightly slower for broader paths
 
@@ -212,9 +213,15 @@ class ButterflyManager {
             butterfly.currentDirection *= (Math.random() < 0.5 ? 1 : -1); // 50/50 chance to reverse orbital direction
             butterfly.lastDirectionChange = now;
             butterfly.orbitalRadius = (70 + Math.random() * 100) * (0.7 + Math.random() * 0.6); // Orbits (70-170) * (0.7-1.3) - wider range
+
+            // Adjust for mobile - smaller margins and movements
+            const isMobile = this.viewport.width <= 768;
+            const marginFactor = isMobile ? 0.3 : 0.8; // Smaller movement range on mobile
+            const centerFactor = isMobile ? 0.4 : 0.6; // Keep butterflies more centered on mobile
+
             // Pick a new target orbital center anywhere within the viewport
-            butterfly.centerX = this.viewport.width * (0.1 + Math.random() * 0.8); // Target X within 10-90% of viewport
-            butterfly.centerY = this.viewport.height * (0.1 + Math.random() * 0.8); // Target Y within 10-90% of viewport
+            butterfly.centerX = this.viewport.width * (0.1 + Math.random() * marginFactor); // Adjusted for mobile
+            butterfly.centerY = this.viewport.height * (0.1 + Math.random() * centerFactor); // Adjusted for mobile
             butterfly.baseSpeed = 0.015 + Math.random() * 0.015; // Re-randomize base speed slightly
             butterfly.waveAmplitude = 8 + Math.random() * 12; // Re-randomize wave amplitude
         }
@@ -241,32 +248,33 @@ class ButterflyManager {
         let currentVx = dx * moveSpeed;
         let currentVy = dy * moveSpeed;
 
-        // Viewport Containment (Bounce/Wrap within viewport)
-        const margin = -50; // Allow butterflies to go further off-screen before bouncing/wrapping
+        // Enhanced Viewport Containment for mobile
+        const isMobile = this.viewport.width <= 768;
+        const margin = isMobile ? 10 : -50; // Much tighter margins on mobile
         const vpWidth = this.viewport.width;
         const vpHeight = this.viewport.height;
 
         // If butterfly hits edge, reverse direction and place it back inside margin
         if (butterfly.x < margin) {
             butterfly.x = margin; // Place at margin
-            butterfly.centerX = vpWidth * (0.2 + Math.random() * 0.6); // Pick new center more towards the other side
+            butterfly.centerX = vpWidth * (isMobile ? 0.3 : 0.2) + Math.random() * (vpWidth * (isMobile ? 0.4 : 0.6)); // Pick new center more towards the other side
         } else if (butterfly.x > vpWidth - margin) {
             butterfly.x = vpWidth - margin; // Place at margin
-            butterfly.centerX = vpWidth * (0.2 + Math.random() * 0.6); // Pick new center more towards the other side
+            butterfly.centerX = vpWidth * (isMobile ? 0.3 : 0.2) + Math.random() * (vpWidth * (isMobile ? 0.4 : 0.6)); // Pick new center more towards the other side
         }
 
         if (butterfly.y < margin) {
             butterfly.y = margin;
-            butterfly.centerY = vpHeight * (0.2 + Math.random() * 0.6);
+            butterfly.centerY = vpHeight * (isMobile ? 0.3 : 0.2) + Math.random() * (vpHeight * (isMobile ? 0.4 : 0.6));
         } else if (butterfly.y > vpHeight - margin) {
             butterfly.y = vpHeight - margin;
-            butterfly.centerY = vpHeight * (0.2 + Math.random() * 0.6);
+            butterfly.centerY = vpHeight * (isMobile ? 0.3 : 0.2) + Math.random() * (vpHeight * (isMobile ? 0.4 : 0.6));
         }
 
         // Ensure orbital centers also stay roughly within viewport to guide butterflies back
-        butterfly.centerX = Math.min(Math.max(butterfly.centerX, margin * 0.5), vpWidth - margin * 0.5); // Allow centers to be near edges
-        butterfly.centerY = Math.min(Math.max(butterfly.centerY, margin * 0.5), vpHeight - margin * 0.5);
-
+        const centerMargin = isMobile ? margin * 2 : margin * 0.5;
+        butterfly.centerX = Math.min(Math.max(butterfly.centerX, centerMargin), vpWidth - centerMargin); // Allow centers to be near edges
+        butterfly.centerY = Math.min(Math.max(butterfly.centerY, centerMargin), vpHeight - centerMargin);
 
         if (Math.abs(currentVx) > 0.01 || Math.abs(currentVy) > 0.01) {
             const targetAngle = Math.atan2(currentVy, currentVx) * (180 / Math.PI);

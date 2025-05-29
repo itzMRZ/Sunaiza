@@ -1,20 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka:wght@400;500;600;700&display=swap');
 
+/* Prevent horizontal scrolling and ensure proper layout */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Apply border-box to all elements */
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Root styling */
+:root {
+    --max-width: 100vw;
 }
 
 html, body {
-    width: 100%; /* Use 100% instead of 100vw to avoid issues with scrollbars */
+    width: 100%;
     min-height: 100vh;
-    overflow-x: hidden !important; /* Reinforced */
+    overflow-x: hidden;
     font-family: 'Nunito', sans-serif;
-    color: var(--text-color);
-    background-color: var(--background-start);
     scroll-behavior: smooth;
-    position: relative; /* Added for potential absolute positioning contexts */
+    margin: 0;
+    padding: 0;
+    max-width: 100vw;
 }
 
 img, video, iframe {
@@ -27,27 +39,21 @@ html {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scroll-padding-top: 20px;
-    width: 100%;
-    overflow-x: hidden !important;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 body {
-    background: linear-gradient(135deg, #F3E8FF 0%, #E0F2FE 50%, #F3E8FF 100%); /* Purple themed gradient */
+    background: linear-gradient(135deg, #F3E8FF 0%, #E0F2FE 50%, #F3E8FF 100%);
     background-attachment: fixed;
-    overflow-x: hidden !important; /* Reinforced */
     min-height: 100vh;
+    font-weight: 500;
+    color: #4B5563;
+    line-height: 1.7;
     display: flex;
     flex-direction: column;
-    width: 100%; /* Use 100% instead of 100vw to avoid scrollbar issues */
-    max-width: 100%; /* Ensure it doesn't exceed viewport */
-    position: relative; /* Ensure body has a positioning context */
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-    touch-action: manipulation;
-    line-height: 1.7;
-    will-change: scroll-position;
-    font-weight: 500;
-    color: #4B5563; /* Default text color */
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 .clouds {
@@ -89,15 +95,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
-    position: relative;
+    flex: 1;    position: relative;
     z-index: 1; /* Above butterflies */
-    contain: layout style paint;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     width: 100%;
-    overflow-x: hidden; /* Prevent internal overflow */
     box-sizing: border-box;
 }
 
@@ -154,10 +157,46 @@ body {
     box-shadow: 6px 6px 0px #F9A8D4; /* Flat 2D shadow */
     transform: rotate(1deg);
     transition: transform 0.2s ease-in-out;
+    position: relative;
 }
 
-.subtitle.special-subtitle:hover {
-    transform: rotate(0deg) scale(1.02);
+.subtitle.special-subtitle::before,
+.subtitle.special-subtitle::after {
+    content: "✨";
+    position: absolute;
+    font-size: clamp(0.2rem, 0.4vw, 0.28rem);
+    color: #FFB6C1;
+    opacity: 0;
+    animation: dreamySparkle 6s infinite ease-in-out;
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px rgba(255, 182, 193, 0.6));
+}
+
+.subtitle.special-subtitle::before {
+    top: clamp(-8px, -1.5vw, -12px);
+    left: clamp(-6px, -1.2vw, -10px);
+    animation-delay: 0s;
+}
+
+.subtitle.special-subtitle::after {
+    bottom: clamp(-8px, -1.5vw, -12px);
+    right: clamp(-6px, -1.2vw, -10px);
+    animation-delay: 3s;
+}
+
+@keyframes dreamySparkle {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(0) scale(0.8);
+    }
+    20%, 80% {
+        opacity: 0.5;
+        transform: translateY(-2px) scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: translateY(-4px) scale(1.2);
+    }
 }
 
 .contact-info {
@@ -197,174 +236,7 @@ body {
     transform: scale(1.05);
 }
 
-.sunflower {
-    position: absolute;
-    width: clamp(140px, 35vw, 200px);
-    height: clamp(140px, 35vw, 200px);
-    top: clamp(-80px, -20vw, -120px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-    opacity: 0;
-    animation: growSunflower 2s ease-out 0.5s both;
-}
 
-.sunflower-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: clamp(35px, 8vw, 50px);
-    height: clamp(35px, 8vw, 50px);
-    background: radial-gradient(circle, #8B4513 0%, #A0522D  30%, #654321 70%, #3E2723 100%);
-    border-radius: 50%;
-    z-index: 3;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.sunflower-center::before {
-    content: '';
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    width: 60%;
-    height: 60%;
-    background: repeating-conic-gradient(from 0deg, #654321 0deg 15deg, #8B4513 15deg 30deg);
-    border-radius: 50%;
-    opacity: 0.8;
-}
-
-.sunflower-petals {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-}
-
-.petal {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: clamp(18px, 4.5vw, 25px);
-    height: clamp(35px, 9vw, 50px);
-    background: linear-gradient(145deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    transform-origin: 50% 100%;
-    transform: translate(-50%, -100%) rotate(calc(var(--i) * 30deg)) translateY(clamp(-15px, -3.5vw, -20px));
-    box-shadow: 
-        0 1px 3px rgba(0,0,0,0.2),
-        inset 0 1px 0 rgba(255,255,255,0.3);
-    animation: petalGrow 0.6s ease-out calc(0.8s + var(--i) * 0.05s) both;
-}
-
-.petal::before {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    width: 2px;
-    height: 70%;
-    background: linear-gradient(to bottom, rgba(255,140,0,0.5), rgba(255,165,0,0.3));
-    transform: translateX(-50%);
-    border-radius: 1px;
-}
-
-.sunflower-stem {
-    position: absolute;
-    bottom: clamp(-60px, -15vw, -90px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: clamp(4px, 1vw, 6px);
-    height: clamp(80px, 20vw, 120px);
-    background: linear-gradient(to bottom, #228B22 0%, #32CD32 50%, #90EE90 100%);
-    border-radius: 0 0 3px 3px;
-    z-index: 0;
-    animation: stemGrow 1.5s ease-out 0.3s both;
-    box-shadow: 2px 0 4px rgba(0,0,0,0.2);
-}
-
-.sunflower-stem::before {
-    content: '';
-    position: absolute;
-    top: 30%;
-    right: -clamp(8px, 2vw, 12px);
-    width: clamp(12px, 3vw, 18px);
-    height: clamp(8px, 2vw, 12px);
-    background: linear-gradient(45deg, #32CD32, #90EE90);
-    border-radius: 50% 10px 50% 10px;
-    transform: rotate(45deg);
-    opacity: 0;
-    animation: leafGrow 0.5s ease-out 1.8s both;
-}
-
-.sunflower-stem::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -clamp(8px, 2vw, 12px);
-    width: clamp(10px, 2.5vw, 15px);
-    height: clamp(6px, 1.5vw, 9px);
-    background: linear-gradient(45deg, #32CD32, #90EE90);
-    border-radius: 50% 10px 50% 10px;
-    transform: rotate(-45deg);
-    opacity: 0;
-    animation: leafGrow 0.5s ease-out 2s both;
-}
-
-/* Growing animations for sunflower */
-@keyframes growSunflower {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) scale(0.3);
-    }
-    50% {
-        opacity: 0.8;
-        transform: translateX(-50%) scale(1.1);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(-50%) scale(1);
-    }
-}
-
-@keyframes petalGrow {
-    0% {
-        transform: translate(-50%, -100%) rotate(calc(var(--i) * 30deg)) translateY(clamp(-15px, -3.5vw, -20px)) scale(0);
-        opacity: 0;
-    }
-    60% {
-        transform: translate(-50%, -100%) rotate(calc(var(--i) * 30deg)) translateY(clamp(-15px, -3.5vw, -20px)) scale(1.1);
-        opacity: 0.9;
-    }
-    100% {
-        transform: translate(-50%, -100%) rotate(calc(var(--i) * 30deg)) translateY(clamp(-15px, -3.5vw, -20px)) scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes stemGrow {
-    0% {
-        height: 0;
-        opacity: 0;
-    }
-    100% {
-        height: clamp(80px, 20vw, 120px);
-        opacity: 1;
-    }
-}
-
-@keyframes leafGrow {
-    0% {
-        opacity: 0;
-        transform: rotate(45deg) scale(0);
-    }
-    100% {
-        opacity: 1;
-        transform: rotate(45deg) scale(1);
-    }
-}
 
 .details {
     text-align: center;
@@ -375,7 +247,8 @@ body {
     margin-top: clamp(35px, 5vw, 55px);
     width: 100%;
     max-width: 650px;
-    border: 3px solid #A78BFA;    animation: fadeInUp 0.8s ease-out 0.4s both;
+    border: 3px solid #A78BFA;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
     transform: rotate(-0.5deg); /* Restored playful tilt */
 }
 
@@ -432,11 +305,11 @@ body {
         overflow: visible !important; /* Allow text to be fully visible */
         text-overflow: clip !important; /* No ellipsis */
     }
-    
+
     .date-box {
         font-size: clamp(1.1rem, 3.2vw, 1.5rem) !important;
     }
-    
+
     .time-box {
         font-size: clamp(1.1rem, 3.2vw, 1.5rem) !important;
     }
@@ -516,7 +389,7 @@ body {
     min-height: clamp(48px, 10.5vw, 56px);
     min-width: clamp(130px, 32vw, 170px);
     will-change: transform, box-shadow;
-    white-space: nowrap;
+    overflow: hidden; /* Prevent internal overflow */
 }
 
 .btn:hover {
@@ -609,30 +482,6 @@ body {
     padding-bottom: clamp(10px, 2vw, 15px); /* Approximate alignment with time-label bottom */
 }
 
-
-/* Base Butterfly Styles */
-.butterfly {
-    position: fixed; /* Changed from absolute to fixed for viewport containment */
-    z-index: 0; /* Adjusted z-index, ensure it's above clouds/grass but below main .container content */
-    pointer-events: none;
-    opacity: 0; /* Set to 0 initially to prevent flash */
-    display: block;
-    will-change: transform, opacity; /* Hint for performance, added opacity */
-}
-
-/* Enhanced color variations for butterflies */
-.butterfly1 {
-    filter: hue-rotate(0deg) drop-shadow(0 2px 8px rgba(225, 29, 72, 0.3));
-}
-.butterfly2 {
-    filter: hue-rotate(45deg) drop-shadow(0 2px 8px rgba(245, 158, 11, 0.3));
-}
-.butterfly3 {
-    filter: hue-rotate(90deg) drop-shadow(0 2px 8px rgba(34, 197, 94, 0.3));
-}
-.butterfly4 {
-    filter: hue-rotate(135deg) drop-shadow(0 2px 8px rgba(59, 130, 246, 0.3));
-}
 .butterfly5 {
     filter: hue-rotate(180deg) drop-shadow(0 2px 8px rgba(147, 51, 234, 0.3));
 }
@@ -883,7 +732,9 @@ body {
     width: 100%;
     max-width: 850px;
     text-align: center;
-    overflow: visible; /* Allow shadows to be seen */    position: relative;    border: 3px solid #A78BFA;
+    overflow: visible; /* Allow shadows to be seen */
+    position: relative;
+    border: 3px solid #A78BFA;
     transform: rotate(0.5deg); /* Restored playful tilt */
 }
 
@@ -1085,115 +936,70 @@ body {
     }
 }
 
-/* Photo Modal - Enhanced */
-.photo-modal {
+/* Essential Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+    }
+    25% {
+        transform: translateY(-10px) translateX(5px);
+    }
+    50% {
+        transform: translateY(-5px) translateX(-5px);
+    }
+    75% {
+        transform: translateY(-15px) translateX(3px);
+    }
+}
+
+@keyframes sway {
+    0%, 100% {
+        transform: rotate(-3deg);
+    }
+    50% {
+        transform: rotate(3deg);
+    }
+}
+
+/* Butterfly base positioning and animation - JavaScript controlled */
+.butterfly {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(15px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    cursor: pointer;
-    padding: clamp(20px, 4vw, 30px);
-    box-sizing: border-box;
-    border: none;
-    margin: 0;
-    max-width: none;
-    max-height: none;
-    animation: modalFadeIn 0.3s ease-out;
-}
-
-.photo-modal[open] {
-    display: flex;
-}
-
-.photo-modal::backdrop {
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(15px);
-}
-
-.photo-modal img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: clamp(12px, 3vw, 20px);
-    box-shadow:
-        0 32px 64px rgba(0, 0, 0, 0.6),
-        0 16px 32px rgba(225, 29, 72, 0.3),
-        0 8px 16px rgba(0, 0, 0, 0.4);
-    object-fit: contain;
-    border: 4px solid rgba(255, 255, 255, 0.15);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: modalImageZoom 0.4s ease-out;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        backdrop-filter: blur(0px);
-    }
-    to {
-        opacity: 1;
-        backdrop-filter: blur(15px);
-    }
-}
-
-@keyframes modalImageZoom {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.close-modal {
-    position: absolute;
-    top: clamp(10px, 2vw, 25px);
-    right: clamp(15px, 3vw, 35px);
-    color: white;
-    font-size: clamp(24px, 4vw, 45px);
-    font-weight: 300;
-    cursor: pointer;
-    z-index: 1001;
-    width: clamp(40px, 8vw, 48px);
-    height: clamp(40px, 8vw, 48px);
-    min-width: 44px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
+    width: clamp(35px, 7vw, 60px);
+    height: auto;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0; /* Start hidden, JavaScript will make them visible */
     transition: all 0.3s ease;
-    border: none;
-    padding: 0;
+    /* Remove CSS positioning - let JavaScript handle all positioning */
 }
 
-.close-modal:hover,
-.close-modal:focus {
-    background: rgba(225, 29, 72, 0.8);
-    transform: scale(1.1);
-    outline: 3px solid rgba(255, 255, 255, 0.5);
-    outline-offset: 2px;
-}
+/* Cloud animations */
+.cloud1 { top: 10%; left: -10%; width: 80px; height: 50px; animation: float 30s infinite linear; }
+.cloud2 { top: 20%; left: -15%; width: 120px; height: 70px; animation: float 40s infinite linear 10s; }
+.cloud3 { top: 60%; left: -12%; width: 100px; height: 60px; animation: float 35s infinite linear 20s; }
+.cloud4 { top: 80%; left: -8%; width: 90px; height: 55px; animation: float 45s infinite linear 30s; }
 
 .footer {
     background: linear-gradient(135deg, #F3E8FF, #E9D5FF); /* Lighter purple gradient */
     color: #581C87; /* Darker purple text for contrast */
     text-align: center;
     padding: clamp(25px, 5vw, 40px) clamp(15px, 4vw, 30px);
-    margin-top: clamp(40px, 8vw, 60px);
+    margin-top: auto; /* Push footer to bottom */
     border-top: 4px solid #D8B4FE; /* Accent border */
     width: 100%; /* Ensure footer spans full width */
-    box-sizing: border-box; /* Include padding in width */    position: relative; /* For z-index stacking if needed, and pseudo-elements */
+    box-sizing: border-box; /* Include padding in width */
+    position: relative; /* For z-index stacking if needed, and pseudo-elements */
     z-index: 2; /* Ensure footer is above general body content/butterflies if they are on z-index 0 or 1 */
     overflow: hidden; /* Prevent any internal overflow */
 }
@@ -1225,18 +1031,6 @@ body {
 
 /* Ensure the main container content is above the fixed butterflies */
 
-/* ===== MOBILE VIEWPORT FIXES ===== */
-/* Critical viewport constraints for mobile devices */
-html, body, .container, .details, .dress-code-container, .gallery, .footer {
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-}
-
-/* Force contained layout for problematic elements */
-.sunflower, .photo-container, .title, .subtitle {
-    max-width: 100% !important;
-}
-
 /* ===== RESPONSIVE BREAKPOINTS ===== */
 
 /* Tablet and small desktop (768px and below) */
@@ -1245,18 +1039,12 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
         flex-wrap: nowrap !important; /* NEVER allow wrapping - maintain PC layout */
         gap: clamp(8px, 2vw, 12px); /* Reduce gap slightly for mobile */
     }
-    
-    .button-group .btn {
+      .button-group .btn {
         font-size: clamp(0.8rem, 2.2vw, 1rem); /* Slightly smaller text to fit */
         padding: clamp(12px, 2.8vw, 16px) clamp(20px, 5vw, 30px); /* Smaller padding */
         min-width: clamp(110px, 28vw, 140px); /* Adjust minimum width for mobile */
     }
-      .sunflower {
-        width: clamp(120px, 30vw, 160px) !important; /* Ensure sunflower doesn't exceed viewport */
-        height: clamp(120px, 30vw, 160px) !important;
-        top: clamp(-60px, -15vw, -80px) !important;
-    }
-    
+
     .photo-container {
         width: clamp(180px, 45vw, 280px);
         height: clamp(180px, 45vw, 280px);
@@ -1273,11 +1061,11 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
         box-shadow: 6px 6px 0px #C4B5FD !important; /* Reduced shadow to prevent overflow */
         margin: 0 10px clamp(22px, 3.8vw, 30px) 10px !important; /* Side margins to contain shadows */
     }
-    
+
     .subtitle {
         margin-bottom: clamp(16px, 2.8vw, 22px) !important;
     }
-    
+
     .subtitle.special-subtitle {
         padding: clamp(16px, 3.2vw, 22px) clamp(25px, 5vw, 35px) !important; /* Better special subtitle padding */
         box-shadow: 4px 4px 0px #F9A8D4 !important; /* Reduced shadow */
@@ -1288,44 +1076,44 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
         box-shadow: 6px 6px 0px #D8B4FE !important; /* Reduced shadow */
         margin: clamp(28px, 4.5vw, 42px) 8px !important; /* Side margins to contain shadows */
     }
-    
+
     .header {
         margin-bottom: clamp(42px, 7vw, 65px) !important; /* Better header spacing */
     }
-    
+
     .photo-container {
         margin: clamp(25px, 4.5vw, 35px) auto !important; /* Improved photo container spacing */
     }
-    
+
     .dress-code-container {
         box-shadow: 6px 6px 0px #D8B4FE !important; /* Reduced shadow */
         margin: clamp(25px, 4vw, 38px) 8px !important; /* Side margins */
     }
-    
+
     .gallery {
         margin: 0 5px !important; /* Ensure gallery doesn't touch edges */
         grid-template-columns: repeat(2, 1fr) !important;
     }
-    
+
     .location-map {
         box-shadow: 6px 6px 0px #D8B4FE !important; /* Reduced shadow */
         margin: clamp(55px, 8.5vw, 75px) 8px 0 8px !important; /* Side margins */
     }
-    
+
     /* Fix button shadows */
     .btn {
         box-shadow: 3px 3px 0px #7C3AED !important; /* Reduced button shadow */
     }
-    
+
     .btn:hover {
         box-shadow: 5px 5px 0px #6D28D9, 0 0 10px #A78BFA !important; /* Reduced hover shadow */
     }
-    
+
     /* Ensure butterflies don't cause overflow */
     body .butterfly {
-        max-width: 100vw !important;
+        max-width: 100% !important;
     }
-    
+
     /* Footer adjustments */
     body .footer {
         margin-left: 0 !important;
@@ -1333,20 +1121,13 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
         width: 100% !important;
         max-width: 100% !important;
     }
-    
+
     /* Ensure photos don't overflow */
     body .gallery-item {
         max-width: 100% !important;
     }
-    
+
     /* Fix any remaining horizontal scroll */
-    body {
-        overflow-x: hidden !important;
-    }
-    
-    html {
-        overflow-x: hidden !important;
-    }
 }
 
 /* iPhone 12/13/14 Pro specific optimization (390x844) */
@@ -1355,65 +1136,65 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
         padding: clamp(15px, 3.3vw, 24px) !important;
         max-width: 374px !important; /* Leave 8px on each side for 390px screen */
     }
-    
+
     .title {
         font-size: clamp(1.95rem, 5.3vw, 2.9rem) !important;
         padding: clamp(21px, 4.3vw, 29px) clamp(27px, 5.3vw, 37px) !important;
         margin: 0 12px clamp(21px, 3.6vw, 29px) 12px !important;
     }
-    
+
     .subtitle {
         font-size: clamp(1.35rem, 3.9vw, 2.1rem) !important;
         margin-bottom: clamp(16px, 2.7vw, 21px) !important;
     }
-    
+
     .subtitle.special-subtitle {
         font-size: clamp(1.55rem, 4.3vw, 2.4rem) !important;
         padding: clamp(16px, 3.1vw, 21px) clamp(25px, 4.9vw, 33px) !important;
         margin: 0 11px clamp(16px, 2.7vw, 21px) 11px !important;
     }
-    
+
     .details {
         padding: clamp(27px, 5.3vw, 39px) !important;
         margin: clamp(27px, 4.3vw, 39px) 11px !important;
     }
-    
+
     .photo-container {
         width: clamp(195px, 47vw, 265px) !important;
         height: clamp(195px, 47vw, 265px) !important;
         margin: clamp(23px, 4.3vw, 33px) auto !important;
     }
-    
+
     .styled-box {
         font-size: clamp(1.08rem, 3.2vw, 1.45rem) !important;
         padding: clamp(12px, 2.4vw, 16px) clamp(16px, 3.4vw, 21px) !important;
         min-width: clamp(175px, 44vw, 245px) !important;
         max-width: clamp(245px, 83vw, 325px) !important;
     }
-    
+
     .dress-code-container {
         padding: clamp(23px, 4.9vw, 36px) !important;
         margin: clamp(23px, 3.9vw, 36px) 11px !important;
     }
-    
+
     .dress-code-item {
         padding: clamp(15px, 3.3vw, 21px) !important;
     }
-    
+
     .countdown-container {
         padding: clamp(13px, 2.6vw, 19px) clamp(17px, 3.6vw, 23px) !important;
         gap: clamp(6px, 1.3vw, 10px) !important;
     }
-    
+
     .time-unit {
         min-width: clamp(50px, 9.8vw, 64px) !important;
         padding: clamp(8px, 1.7vw, 12px) clamp(10px, 2.2vw, 15px) !important;
     }
-    
+
     .time-number {
         font-size: clamp(1.35rem, 3.9vw, 1.95rem) !important;
     }
-    
+
     .location-map {
         margin: clamp(52px, 8.2vw, 72px) 11px 0 11px !important;
     }
@@ -1426,18 +1207,18 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
 /* iPhone SE and similar small screens (375px and below) */
 @media screen and (max-width: 375px) {
     body .container {
-        max-width: calc(100vw - 12px) !important; /* Leave 6px on each side */
+        max-width: calc(100% - 12px) !important; /* Leave 6px on each side */
     }
-    
-    body .title, 
-    body .subtitle.special-subtitle, 
-    body .details, 
-    body .dress-code-container, 
+
+    body .title,
+    body .subtitle.special-subtitle,
+    body .details,
+    body .dress-code-container,
     body .location-map {
         margin-left: 6px !important;
         margin-right: 6px !important;
     }
-    
+
     body .gallery {
         margin-left: 3px !important;
         margin-right: 3px !important;
@@ -1447,18 +1228,18 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
 /* Large mobile screens (431px to 480px) - iPhone 14 Plus, etc. */
 @media screen and (min-width: 431px) and (max-width: 480px) {
     body .container {
-        max-width: calc(100vw - 20px) !important; /* Leave 10px on each side */
+        max-width: calc(100% - 20px) !important; /* Leave 10px on each side */
     }
-    
-    body .title, 
-    body .subtitle.special-subtitle, 
-    body .details, 
-    body .dress-code-container, 
+
+    body .title,
+    body .subtitle.special-subtitle,
+    body .details,
+    body .dress-code-container,
     body .location-map {
         margin-left: 10px !important;
         margin-right: 10px !important;
     }
-    
+
     body .gallery {
         margin-left: 6px !important;
         margin-right: 6px !important;
@@ -1471,69 +1252,148 @@ html, body, .container, .details, .dress-code-container, .gallery, .footer {
         padding: clamp(12px, 3vw, 18px) !important;
         max-width: 344px !important; /* Leave 8px on each side for 360px screen */
     }
-    
+
     body .title {
         font-size: clamp(1.8rem, 5vw, 2.6rem) !important;
         margin: 0 8px clamp(18px, 3vw, 24px) 8px !important;
     }
-    
+
     body .styled-box {
-        min-width: clamp(160px, 42vw, 220px) !important;
+    min-width: clamp(160px, 42vw, 220px) !important;
         max-width: clamp(220px, 80vw, 300px) !important;
     }
 }
 
-
-
-/* Extremely delicate Barbie-style sparkles for Sunaiza's 1st Birthday text */
-.special-subtitle {
-    position: relative;
-    overflow: visible;
-    text-shadow: 
-        0 0 2px rgba(255, 182, 193, 0.2),
-        0 0 4px rgba(255, 192, 203, 0.1);
-}
-
-/* Tiny precious sparkles - Barbie movie inspired */
-.special-subtitle::before,
-.special-subtitle::after {
-    content: '✨';
-    position: absolute;
-    font-size: clamp(0.2rem, 0.4vw, 0.28rem); /* Even tinier sparkles */
-    opacity: 0;
-    animation: dreamySparkle 6s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 10;
-    filter: drop-shadow(0 0 1px rgba(255, 182, 193, 0.4));
-    color: #FFB6C1; /* Light pink color */
-}
-
-.special-subtitle::before {
-    top: clamp(-5px, -1vw, -8px);
-    left: clamp(20%, 25vw, 32%);
-    animation-delay: 0s;
-    transform: rotate(15deg) scale(0.5);
-}
-
-.special-subtitle::after {
-    top: clamp(-3px, -0.6vw, -5px);
-    right: clamp(20%, 25vw, 32%);
-    animation-delay: 3s;
-    transform: rotate(-15deg) scale(0.4);
-}
-
-/* Dreamy, soft sparkle animation */
-@keyframes dreamySparkle {
-    0%, 85%, 100% {
-        opacity: 0;
-        transform: rotate(15deg) scale(0.3);
+/* ===== MOBILE OVERFLOW PREVENTION ===== */
+@media screen and (max-width: 768px) {
+    /* Prevent any horizontal overflow on mobile */
+    html, body {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        width: 100% !important;
     }
-    15%, 75% {
-        opacity: 0.25;
-        transform: rotate(15deg) scale(0.45);
+
+    /* Ensure all major containers stay within bounds */
+    .container, .header, .details, .dress-code-container, .gallery, .footer {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
-    40% {
-        opacity: 0.5;
-        transform: rotate(15deg) scale(0.55);
+
+    /* Fix any element that might cause overflow */
+    * {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Ensure images and photos don't overflow */
+    img, .photo-container, .gallery-item {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Ensure butterflies stay within viewport on mobile */
+    .butterfly {
+        max-width: 40px !important;
+        width: 40px !important;
+    }
+
+    /* Force proper text wrapping */
+    p, h1, h2, h3, .title, .subtitle {
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+        max-width: 100% !important;
     }
 }
+
+/* ===== ADDITIONAL MOBILE SPECIFIC CONSTRAINTS ===== */
+@media screen and (max-width: 480px) {
+    /* Extra strict mobile constraints for very small screens */
+    html, body {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        position: relative !important;
+    }
+
+    /* Ensure all content containers are properly constrained */
+    .container {
+        max-width: calc(100vw - 20px) !important;
+        margin: 0 10px !important;
+        padding: 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Strict text wrapping for small screens */
+    .title {
+        font-size: clamp(1.5rem, 8vw, 2.5rem) !important;
+        word-break: break-word !important;
+        hyphens: auto !important;
+    }
+
+    .subtitle {
+        font-size: clamp(1.2rem, 6vw, 1.8rem) !important;
+        word-break: break-word !important;
+    }
+
+    /* Gallery grid adjustments for mobile */
+    .gallery {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }    /* Button group mobile optimization - keep side by side */
+    .button-group {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: clamp(8px, 2vw, 12px) !important;
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .button-group .btn {
+        flex: 1 !important;
+        max-width: 45% !important;
+        min-width: clamp(110px, 28vw, 140px) !important;
+        font-size: clamp(0.8rem, 2.2vw, 1rem) !important;
+        padding: clamp(10px, 2.5vw, 14px) clamp(18px, 4.5vw, 25px) !important;
+    }
+
+    /* Dress code mobile layout */
+    .dress-code-items {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+
+    .dress-code-item {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* ===== ULTRA SMALL MOBILE (320px and below) ===== */
+@media screen and (max-width: 320px) {
+    .container {
+        margin: 0 5px !important;
+        padding: 5px !important;
+        max-width: calc(100vw - 10px) !important;
+    }
+
+    .title {
+        font-size: clamp(1.3rem, 9vw, 2rem) !important;
+        padding: 15px !important;
+    }
+
+    .photo-container {
+        width: clamp(150px, 80vw, 200px) !important;
+        height: clamp(150px, 80vw, 200px) !important;
+    }
+
+    .gallery {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 5px !important;
+    }
+}
+
+/* ===== EXISTING RESPONSIVE BREAKPOINTS (Preserved) ===== */
