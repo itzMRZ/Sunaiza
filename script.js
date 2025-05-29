@@ -299,25 +299,26 @@ class ButterflyManager {
 let butterflyManager;
 let entranceAnimationManager;
 
-// Initialize animation systems
+// Initialize systems when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown
     initializeCountdown();
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Initialize entrance animations first
-    entranceAnimationManager = new EntranceAnimationManager();
-    // entranceAnimationManager.setupAnimations(); // This is called inside its constructor if designed that way, or explicitly if not.
-                                                // Assuming setupAnimations is called by its constructor or an init method.
+    // Initialize Photo Modal Manager
+    window.photoModalManager = new PhotoModalManager();
 
-    // Initialize ButterflyManager and call its init method
+    // Initialize entrance animations
+    entranceAnimationManager = new EntranceAnimationManager();
+
+    // Initialize ButterflyManager with delay for proper layout calculation
     butterflyManager = new ButterflyManager();
     setTimeout(() => {
         if (butterflyManager) {
-            butterflyManager.init(); // Call init here to ensure DOM is ready for origin calculation
+            butterflyManager.init();
         }
-    }, 350); // Slightly increased delay to ensure .photo-container is definitely laid out
+    }, 350);
 });
 
 // Subtle mouse interaction for natural behavior
@@ -342,78 +343,193 @@ document.addEventListener('mousemove', function(e) {
     }
 });
 
-// Photo modal functionality
+// ===== MODAL FUNCTIONALITY (CONSOLIDATED) =====
+class PhotoModalManager {
+    constructor() {
+        this.modal = document.getElementById('photoModal');
+        this.modalImg = document.getElementById('modalImage');
+        this.closeButton = null;
+        this.isClosing = false;
+        this.init();
+    }    init() {
+        if (!this.modal || !this.modalImg) {
+            console.warn('Modal elements not found');
+            return;
+        }
+
+        // Ensure modal is closed on initialization
+        if (this.modal.hasAttribute('open')) {
+            this.modal.close();
+        }
+
+        this.closeButton = this.modal.querySelector('.close-modal');
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Close button click
+        if (this.closeButton) {
+            this.closeButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeModal();
+            });
+        }
+
+        // Click outside modal to close
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.closeModal();
+            }
+        });
+
+        // Keyboard events
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.modal.hasAttribute('open')) {
+                this.closeModal();
+            }
+        });
+
+        // Gallery event delegation
+        const gallery = document.querySelector('.gallery');
+        if (gallery) {
+            gallery.addEventListener('click', (e) => {
+                const galleryItem = e.target.closest('.gallery-item');
+                if (galleryItem) {
+                    e.preventDefault();
+                    const imageSrc = galleryItem.dataset.src;
+                    const imageAlt = galleryItem.dataset.alt;
+                    this.openModal(imageSrc, imageAlt);
+                }
+            });
+
+            // Keyboard navigation for gallery items
+            gallery.addEventListener('keydown', (e) => {
+                const galleryItem = e.target.closest('.gallery-item');
+                if (galleryItem && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    const imageSrc = galleryItem.dataset.src;
+                    const imageAlt = galleryItem.dataset.alt;
+                    this.openModal(imageSrc, imageAlt);
+                }
+            });
+        }
+
+        // Handle photo container click (baby photo)
+        const babyPhoto = document.getElementById('babyPhoto');
+        if (babyPhoto) {
+            babyPhoto.addEventListener('click', () => {
+                this.openModal(babyPhoto.src, babyPhoto.alt || 'Sunaiza');
+            });
+            babyPhoto.style.cursor = 'pointer';
+        }
+    }
+
+    openModal(imageSrc, imageAlt) {
+        if (this.isClosing) return;
+
+        this.modalImg.src = imageSrc;
+        this.modalImg.alt = imageAlt;
+
+        // Show modal
+        this.modal.showModal();
+
+        // Add opening animation class
+        this.modal.classList.remove('closing');
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+
+        // Focus management for accessibility
+        this.closeButton?.focus();
+
+        // Add touch event listeners for mobile
+        this.addTouchSupport();
+    }
+
+    closeModal() {
+        if (this.isClosing) return;
+
+        this.isClosing = true;
+
+        // Add closing animation
+        this.modal.classList.add('closing');
+
+        // Wait for animation to complete
+        setTimeout(() => {
+            this.modal.close();
+            this.modal.classList.remove('closing');
+
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
+
+            // Clear image to free memory
+            this.modalImg.src = '';
+            this.modalImg.alt = '';
+
+            this.isClosing = false;
+
+            // Remove touch listeners
+            this.removeTouchSupport();
+        }, 200);
+    }
+
+    addTouchSupport() {
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        const handleTouchStart = (e) => {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        };
+
+        const handleTouchMove = (e) => {
+            if (!isDragging) return;
+
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - startY;
+
+            // If swipe down distance is significant, close modal
+            if (deltaY > 100) {
+                this.closeModal();
+                isDragging = false;
+            }
+        };
+
+        const handleTouchEnd = () => {
+            isDragging = false;
+        };
+
+        this.modal.addEventListener('touchstart', handleTouchStart, { passive: true });
+        this.modal.addEventListener('touchmove', handleTouchMove, { passive: true });
+        this.modal.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        // Store references for cleanup
+        this.touchHandlers = { handleTouchStart, handleTouchMove, handleTouchEnd };
+    }
+
+    removeTouchSupport() {
+        if (this.touchHandlers) {
+            this.modal.removeEventListener('touchstart', this.touchHandlers.handleTouchStart);
+            this.modal.removeEventListener('touchmove', this.touchHandlers.handleTouchMove);
+            this.modal.removeEventListener('touchend', this.touchHandlers.handleTouchEnd);
+            this.touchHandlers = null;
+        }
+    }
+}
+
+// Legacy functions for backward compatibility
 function enlargePhoto(imageSrc, imageAlt) {
-    const modal = document.getElementById('photoModal');
-    const modalImg = document.getElementById('modalImage');
-
-    modalImg.src = imageSrc;
-    modalImg.alt = imageAlt;
-    modal.showModal();
-
-    // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
+    if (window.photoModalManager) {
+        window.photoModalManager.openModal(imageSrc, imageAlt);
+    }
 }
 
 function closeModal() {
-    const modal = document.getElementById('photoModal');
-    modal.close();
-
-    // Restore body scroll
-    document.body.style.overflow = 'auto';
+    if (window.photoModalManager) {
+        window.photoModalManager.closeModal();
+    }
 }
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-    }
-});
-
-// Gallery event delegation
-document.addEventListener('DOMContentLoaded', function() {
-    const gallery = document.querySelector('.gallery');
-
-    if (gallery) {
-        gallery.addEventListener('click', function(e) {
-            const galleryItem = e.target.closest('.gallery-item');
-            if (galleryItem) {
-                e.preventDefault();
-                const imageSrc = galleryItem.dataset.src;
-                const imageAlt = galleryItem.dataset.alt;
-                enlargePhoto(imageSrc, imageAlt);
-            }
-        });
-
-        // Handle keyboard navigation for gallery items
-        gallery.addEventListener('keydown', function(e) {
-            const galleryItem = e.target.closest('.gallery-item');
-            if (galleryItem && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault();
-                const imageSrc = galleryItem.dataset.src;
-                const imageAlt = galleryItem.dataset.alt;
-                enlargePhoto(imageSrc, imageAlt);
-            }
-        });
-    }
-
-    // Modal event listeners
-    const modal = document.getElementById('photoModal');
-    const closeButton = modal?.querySelector('.close-modal');
-
-    if (modal) {
-        // Close when clicking on modal background
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-    }
-
-    if (closeButton) {
-        closeButton.addEventListener('click', closeModal);
-    }
-});
 
 // Make gallery items interactive (keep for any remaining placeholders)
 const placeholders = document.querySelectorAll('.placeholder');

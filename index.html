@@ -116,11 +116,11 @@
         </div>
         </main>
     </div><!-- Photo Modal -->
-    <dialog id="photoModal" class="photo-modal" aria-labelledby="modalTitle" aria-describedby="modalDescription">
-        <button class="close-modal" aria-label="Close photo modal" type="button">&times;</button>
+    <dialog id="photoModal" class="photo-modal" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDescription">
+        <button class="close-modal" aria-label="Close photo modal" type="button" tabindex="0">&times;</button>
         <img id="modalImage" src="" alt="">
-        <div id="modalTitle" class="sr-only">Photo viewer</div>
-        <div id="modalDescription" class="sr-only">Use the close button or tap outside to close</div>
+        <div id="modalTitle" class="sr-only">Photo viewer - Enlarged image</div>
+        <div id="modalDescription" class="sr-only">Use the close button, press Escape key, or tap outside to close the modal. On mobile, you can also swipe down to close.</div>
     </dialog><div class="footer">
         <p>We can't wait to celebrate with you!</p>
         <p class="contact-info">For any inquiries, please call us</p>        <div class="footer-butterflies">
