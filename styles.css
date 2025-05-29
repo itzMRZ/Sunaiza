@@ -975,13 +975,12 @@ body {
 /* Butterfly base positioning and animation - JavaScript controlled */
 .butterfly {
     position: fixed;
-    width: clamp(35px, 7vw, 60px);
+    width: clamp(45px, 8vw, 80px);
     height: auto;
     pointer-events: none;
     z-index: 0;
     opacity: 0; /* Start hidden, JavaScript will make them visible */
     transition: all 0.3s ease;
-    /* Remove CSS positioning - let JavaScript handle all positioning */
 }
 
 /* Cloud animations */
@@ -989,6 +988,74 @@ body {
 .cloud2 { top: 20%; left: -15%; width: 120px; height: 70px; animation: float 40s infinite linear 10s; }
 .cloud3 { top: 60%; left: -12%; width: 100px; height: 60px; animation: float 35s infinite linear 20s; }
 .cloud4 { top: 80%; left: -8%; width: 90px; height: 55px; animation: float 45s infinite linear 30s; }
+
+.photo-modal {
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 85vw;
+    max-height: 85vh;
+    width: auto;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 6px 15px rgba(138, 43, 226, 0.15);
+    margin: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.photo-modal::backdrop {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.photo-modal .close-modal {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: white;
+    color: #8B5CF6;
+    border: 2px solid #C4B5FD;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0;
+}
+
+.photo-modal img {
+    max-width: 100%;
+    max-height: 75vh;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
 
 .footer {
     background: linear-gradient(135deg, #F3E8FF, #E9D5FF); /* Lighter purple gradient */
@@ -1292,12 +1359,10 @@ body {
     img, .photo-container, .gallery-item {
         max-width: 100% !important;
         height: auto !important;
-    }
-
-    /* Ensure butterflies stay within viewport on mobile */
+    }    /* Ensure butterflies stay within viewport on mobile */
     .butterfly {
-        max-width: 40px !important;
-        width: 40px !important;
+        max-width: 55px !important;
+        width: 55px !important;
     }
 
     /* Force proper text wrapping */
