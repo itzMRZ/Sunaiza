@@ -98,7 +98,7 @@ const rsvpButton = document.getElementById('rsvpBtn');
 if (rsvpButton) {
     rsvpButton.addEventListener('click', function(e) {
         e.preventDefault();
-        alert("Thank you for your interest! Please send an email to parents@email.com to confirm your attendance.");
+        window.open('https://wa.me/qr/LCBNPCPOZS67M1', '_blank');
     });
 }
 
@@ -137,30 +137,40 @@ class ButterflyManager {
 
     createButterflies() {
         const butterflyElements = document.querySelectorAll('.butterfly');
-        const originX = this.origin.x;
-        const originY = this.origin.y;
+        // REMOVED: originX and originY as starting points will be more varied.
 
         butterflyElements.forEach((element, index) => {
+            // Determine starting side: left (true) or right (false)
+            const startFromLeftSide = Math.random() < 0.5;
+            let startX;
+            if (startFromLeftSide) {
+                startX = (Math.random() * -0.2 - 0.05) * this.viewport.width; // Start off-screen left (-5% to -25%)
+            } else {
+                startX = (1.05 + Math.random() * 0.2) * this.viewport.width; // Start off-screen right (105% to 125%)
+            }
+            const startY = Math.random() * this.viewport.height; // Random Y position within viewport height
+
             const butterfly = {
                 element: element,
                 index: index,
-                x: originX + (Math.random() - 0.5) * 20, // Start near origin (viewport relative)
-                y: originY + (Math.random() - 0.5) * 20, // Start near origin (viewport relative)
-                baseSpeed: 0.018 + Math.random() * 0.012, // Speed (0.018 to 0.03)
+                x: startX,
+                y: startY,
+                baseSpeed: 0.015 + Math.random() * 0.015, // Speed (0.015 to 0.03)
                 orbitalAngle: Math.random() * Math.PI * 2,
-                orbitalRadius: 50 + Math.random() * 70, // Orbits (50 to 120)
+                orbitalRadius: 60 + Math.random() * 80, // Orbits (60 to 140) - increased range
                 // centerX and centerY will now be relative to viewport and updated to stay within
-                centerX: this.viewport.width * (0.3 + Math.random() * 0.4), // Random initial center X in viewport
-                centerY: this.viewport.height * (0.3 + Math.random() * 0.4), // Random initial center Y in viewport
+                centerX: this.viewport.width * (0.2 + Math.random() * 0.6), // Target X within 20-80% of viewport
+                centerY: this.viewport.height * (0.2 + Math.random() * 0.6), // Target Y within 20-80% of viewport
                 phase: Math.random() * Math.PI * 2,
-                waveAmplitude: 7 + Math.random() * 10, // Waves (7 to 17)
+                waveAmplitude: 8 + Math.random() * 12, // Waves (8 to 20) - increased range
                 currentDirection: Math.random() < 0.5 ? 1 : -1,
                 rotation: Math.random() * 360,
-                scale: 0.045 + Math.random() * 0.02, // Scale (0.045 to 0.065)
-                lastDirectionChange: Date.now() - Math.random() * 10000,
-                directionChangeInterval: 10000 + Math.random() * 8000, // Change 10-18 seconds
+                scale: 0.04 + Math.random() * 0.03, // Scale (0.04 to 0.07) - slightly increased max
+                lastDirectionChange: Date.now() - Math.random() * 12000,
+                directionChangeInterval: 12000 + Math.random() * 10000, // Change 12-22 seconds - increased interval
             };
             this.positionButterfly(butterfly);
+            butterfly.element.style.opacity = '1'; // Make butterfly visible after initial setup
             this.butterflies.push(butterfly);
         });
     }
@@ -195,18 +205,20 @@ class ButterflyManager {
     }
     updateButterfly(butterfly) {
         const now = Date.now();
-        const time = now * 0.0007; // Time factor for wave motion, slightly faster
+        const time = now * 0.0006; // Time factor for wave motion, slightly slower for broader paths
 
         if (now - butterfly.lastDirectionChange > butterfly.directionChangeInterval) {
-            butterfly.currentDirection *= (Math.random() < 0.6 ? 1 : -1);
+            butterfly.currentDirection *= (Math.random() < 0.5 ? 1 : -1); // 50/50 chance to reverse orbital direction
             butterfly.lastDirectionChange = now;
-            butterfly.orbitalRadius = (50 + Math.random() * 70) * (0.8 + Math.random() * 0.4);
-            // Pick a new target orbital center within the viewport
+            butterfly.orbitalRadius = (70 + Math.random() * 100) * (0.7 + Math.random() * 0.6); // Orbits (70-170) * (0.7-1.3) - wider range
+            // Pick a new target orbital center anywhere within the viewport
             butterfly.centerX = this.viewport.width * (0.1 + Math.random() * 0.8); // Target X within 10-90% of viewport
             butterfly.centerY = this.viewport.height * (0.1 + Math.random() * 0.8); // Target Y within 10-90% of viewport
+            butterfly.baseSpeed = 0.015 + Math.random() * 0.015; // Re-randomize base speed slightly
+            butterfly.waveAmplitude = 8 + Math.random() * 12; // Re-randomize wave amplitude
         }
 
-        butterfly.orbitalAngle += butterfly.currentDirection * butterfly.baseSpeed * 0.18; // Adjusted speed factor
+        butterfly.orbitalAngle += butterfly.currentDirection * butterfly.baseSpeed * 0.15; // Adjusted speed factor
 
         const orbitalX = Math.cos(butterfly.orbitalAngle) * butterfly.orbitalRadius;
         const orbitalY = Math.sin(butterfly.orbitalAngle) * butterfly.orbitalRadius;
@@ -218,11 +230,7 @@ class ButterflyManager {
         let targetX = butterfly.centerX + orbitalX + waveX;
         let targetY = butterfly.centerY + orbitalY + waveY;
 
-        // Gentle random drift of the main orbital center (centerX, centerY) - keep it subtle
-        // butterfly.centerX += (Math.random() - 0.5) * 0.1; // Reduced drift
-        // butterfly.centerY += (Math.random() - 0.5) * 0.1; // Reduced drift
-
-        const moveSpeed = 0.012 + Math.random() * 0.008; // (0.012 to 0.020) - slightly faster lerp
+        const moveSpeed = 0.01 + Math.random() * 0.008; // (0.01 to 0.018) - slightly slower lerp for smoother, wider paths
         let dx = targetX - butterfly.x;
         let dy = targetY - butterfly.y;
 
@@ -233,30 +241,34 @@ class ButterflyManager {
         let currentVy = dy * moveSpeed;
 
         // Viewport Containment (Bounce/Wrap within viewport)
-        const margin = 10; // Small margin from edge
+        const margin = -50; // Allow butterflies to go further off-screen before bouncing/wrapping
         const vpWidth = this.viewport.width;
         const vpHeight = this.viewport.height;
 
         // If butterfly hits edge, reverse direction and place it back inside margin
         if (butterfly.x < margin) {
-            butterfly.x = margin;
-            butterfly.centerX += Math.abs(dx) + 20; // Nudge orbital center away from edge
+            butterfly.x = margin; // Place at margin
+            butterfly.centerX = vpWidth * (0.2 + Math.random() * 0.6); // Pick new center more towards the other side
+            // butterfly.currentDirection *= -1; // Optionally reverse direction
         } else if (butterfly.x > vpWidth - margin) {
-            butterfly.x = vpWidth - margin;
-            butterfly.centerX -= Math.abs(dx) + 20; // Nudge orbital center away from edge
+            butterfly.x = vpWidth - margin; // Place at margin
+            butterfly.centerX = vpWidth * (0.2 + Math.random() * 0.6); // Pick new center more towards the other side
+            // butterfly.currentDirection *= -1;
         }
 
         if (butterfly.y < margin) {
             butterfly.y = margin;
-            butterfly.centerY += Math.abs(dy) + 20; // Nudge orbital center away from edge
+            butterfly.centerY = vpHeight * (0.2 + Math.random() * 0.6);
+            // butterfly.currentDirection *= -1;
         } else if (butterfly.y > vpHeight - margin) {
             butterfly.y = vpHeight - margin;
-            butterfly.centerY -= Math.abs(dy) + 20; // Nudge orbital center away from edge
+            butterfly.centerY = vpHeight * (0.2 + Math.random() * 0.6);
+            // butterfly.currentDirection *= -1;
         }
 
         // Ensure orbital centers also stay roughly within viewport to guide butterflies back
-        butterfly.centerX = Math.min(Math.max(butterfly.centerX, margin * 2), vpWidth - margin * 2);
-        butterfly.centerY = Math.min(Math.max(butterfly.centerY, margin * 2), vpHeight - margin * 2);
+        butterfly.centerX = Math.min(Math.max(butterfly.centerX, margin * 0.5), vpWidth - margin * 0.5); // Allow centers to be near edges
+        butterfly.centerY = Math.min(Math.max(butterfly.centerY, margin * 0.5), vpHeight - margin * 0.5);
 
 
         if (Math.abs(currentVx) > 0.01 || Math.abs(currentVy) > 0.01) {
@@ -411,11 +423,9 @@ class EntranceAnimationManager {
     constructor() {
         this.animatedElements = [];
         this.observer = null;
-        // console.log("EntranceAnimationManager initialized");
     }
 
     setupAnimations() {
-        // console.log("Setting up entrance animations...");
         this.animatedElements = document.querySelectorAll('.section-title, .intro-text, .event-details p, .countdown-container, .button-group button, .dress-code-item, .footer p, .gallery-photo'); // MODIFIED: Re-added .gallery-photo for entrance animation
 
         const options = {
@@ -427,7 +437,6 @@ class EntranceAnimationManager {
         this.observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    // console.log(`Animating element: ${entry.target.classList}`);
                     this.animateElement(entry.target);
                     observer.unobserve(entry.target);
                 }
@@ -445,7 +454,6 @@ class EntranceAnimationManager {
         // Handle elements that might already be in view on load
         this.animatedElements.forEach(element => {
             if (this.isElementInViewport(element) && !element.classList.contains('animated')) {
-                // console.log(`Animating immediately (already in view): ${element.classList}`);
                 this.animateElement(element);
                 if (this.observer) { // Check if observer exists before unobserving
                     this.observer.unobserve(element);
@@ -496,14 +504,12 @@ class EntranceAnimationManager {
             element.style.opacity = '1';
             element.style.transform = 'translateY(0) scale(1)'; // MODIFIED
         } else if (element.classList.contains('gallery-photo')) {
-            // console.log("Animating gallery photo");
             element.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
             element.style.opacity = '1';
             element.style.transform = 'translateY(0) scale(1)';
             element.classList.add('animated');
         } else {
             // Default animation for other elements
-            // console.log("Animating default element");
             element.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
             element.style.opacity = '1';
             element.style.transform = 'translateY(0) scale(1)'; // Keep a slight scale for a subtle effect

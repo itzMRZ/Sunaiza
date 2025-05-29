@@ -2,7 +2,7 @@
   "name": "Sunaiza's 1st Birthday Celebration",
   "short_name": "Sunaiza's Birthday",
   "description": "Join us to celebrate Sunaiza's 1st Birthday - A butterfly themed celebration",
-  "start_url": "./butterflybirthdaywebsite.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FFE4E6",
   "theme_color": "#E11D48",
