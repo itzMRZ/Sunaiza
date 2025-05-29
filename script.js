@@ -298,6 +298,7 @@ class ButterflyManager {
 // Initialize butterfly manager when DOM is loaded
 let butterflyManager;
 let entranceAnimationManager;
+let lazyLoadingManager;
 
 // Initialize systems when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -312,13 +313,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize entrance animations
     entranceAnimationManager = new EntranceAnimationManager();
 
-    // Initialize ButterflyManager with delay for proper layout calculation
+    // Initialize Advanced Lazy Loading Manager
+    lazyLoadingManager = new LazyLoadingManager();
+
+    // Initialize ButterflyManager - will be lazy loaded by LazyLoadingManager
     butterflyManager = new ButterflyManager();
-    setTimeout(() => {
-        if (butterflyManager) {
-            butterflyManager.init();
-        }
-    }, 350);
+    window.butterflyManager = butterflyManager; // Make globally accessible
+    window.entranceAnimationManager = entranceAnimationManager; // Make globally accessible
 });
 
 // Subtle mouse interaction for natural behavior
@@ -635,6 +636,774 @@ class EntranceAnimationManager {
             element.style.opacity = '1';
             element.style.transform = 'translateY(0) scale(1)'; // Keep a slight scale for a subtle effect
             element.classList.add('animated');
+        }
+    }
+}
+
+// Advanced Lazy Loading Manager
+class LazyLoadingManager {    constructor() {
+        this.imageObserver = null;
+        this.deferredElements = new Set();
+        this.loadedElements = new Set();
+        this.isIntersecting = false;
+        this.connectionSpeed = this.detectConnectionSpeed();
+        this.preloadQueue = [];
+        this.userInteractionLevel = 'normal'; // Track user engagement
+        this.loadingPriority = new Map(); // Priority queue for loading
+        this.init();
+    }
+
+    detectConnectionSpeed() {
+        if ('connection' in navigator) {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection) {
+                // Return 'fast' for 4g, 'medium' for 3g, 'slow' for 2g
+                switch(connection.effectiveType) {
+                    case '4g': return 'fast';
+                    case '3g': return 'medium';
+                    case '2g': 
+                    case 'slow-2g': return 'slow';
+                    default: return 'medium';
+                }
+            }
+        }
+        return 'medium'; // Default fallback
+    }    init() {
+        this.setupImageLazyLoading();
+        this.setupMapLazyLoading();
+        this.setupProgressiveFeatureLoading();
+        this.setupLoadingPlaceholders();        this.setupPrefetching();        this.setupContentLazyLoading();
+        this.trackUserEngagement();
+        this.setupFallbackLoading();
+        
+        // Setup retry mechanism for failed loads
+        setTimeout(() => this.retryFailedLoads(), 15000);
+    }setupImageLazyLoading() {
+        // Adjust rootMargin based on connection speed
+        const rootMargin = this.connectionSpeed === 'fast' ? '100px' : 
+                          this.connectionSpeed === 'medium' ? '50px' : '25px';
+        
+        const options = {
+            root: null,
+            rootMargin: rootMargin,
+            threshold: 0.1
+        };
+
+        this.imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.loadImageWithAnimation(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, options);
+
+        // Observe all gallery images and dress code images
+        const lazyImages = document.querySelectorAll('.gallery-photo, .dress-code-item img');
+        lazyImages.forEach(img => {
+            this.deferredElements.add(img);
+            this.addLoadingPlaceholder(img);
+            this.imageObserver.observe(img);
+        });
+    }    loadImageWithAnimation(img) {
+        if (this.loadedElements.has(img)) return;
+        
+        this.loadedElements.add(img);
+        
+        // Create a fade-in animation with connection-aware timing
+        const animationDuration = this.connectionSpeed === 'slow' ? '0.3s' : '0.6s';
+        img.style.transition = `opacity ${animationDuration} ease-out, transform ${animationDuration} ease-out`;
+        img.style.opacity = '0';
+        img.style.transform = 'scale(0.95)';
+        
+        // Add loading class for CSS animations
+        img.classList.add('lazy-loading');
+          const handleLoad = () => {
+            img.style.opacity = '1';
+            img.style.transform = 'scale(1)';
+            img.classList.remove('lazy-loading');
+            img.classList.add('lazy-loaded', 'loading-fade-in');
+            this.removeLoadingPlaceholder(img);
+            
+            // Update accessibility attributes
+            img.removeAttribute('aria-label');
+            img.setAttribute('aria-label', img.alt || 'Loaded image');
+            
+            // Trigger a reflow to ensure smooth animation
+            img.offsetHeight;
+        };
+
+        const handleError = () => {
+            img.classList.remove('lazy-loading');
+            img.classList.add('lazy-error');
+            this.removeLoadingPlaceholder(img);
+            console.warn('Failed to load image:', img.src);
+        };
+
+        if (img.complete && img.naturalHeight !== 0) {
+            handleLoad();
+        } else {
+            img.addEventListener('load', handleLoad, { once: true });
+            img.addEventListener('error', handleError, { once: true });
+            
+            // Add timeout for slow connections
+            if (this.connectionSpeed === 'slow') {
+                setTimeout(() => {
+                    if (img.classList.contains('lazy-loading')) {
+                        handleError();
+                    }
+                }, 10000); // 10 second timeout for slow connections
+            }
+        }
+    }    addLoadingPlaceholder(img) {
+        const container = img.closest('.gallery-item, .dress-code-item');
+        if (!container) return;
+
+        const placeholder = document.createElement('div');
+        placeholder.className = 'lazy-placeholder';
+        placeholder.setAttribute('aria-hidden', 'true');
+        placeholder.innerHTML = `
+            <div class="placeholder-content">
+                <div class="placeholder-shimmer"></div>
+            </div>
+        `;
+        
+        container.style.position = 'relative';
+        container.appendChild(placeholder);
+
+        // Add loading state announcement for screen readers
+        img.setAttribute('aria-label', 'Image loading...');
+    }
+
+    removeLoadingPlaceholder(img) {
+        const container = img.closest('.gallery-item, .dress-code-item');
+        if (!container) return;
+
+        const placeholder = container.querySelector('.lazy-placeholder');
+        if (placeholder) {
+            placeholder.style.opacity = '0';
+            setTimeout(() => placeholder.remove(), 300);
+        }
+    }
+
+    setupMapLazyLoading() {
+        const mapContainer = document.querySelector('.location-map');
+        if (!mapContainer) return;
+
+        const mapObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this.loadGoogleMap();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '100px' });
+
+        mapObserver.observe(mapContainer);
+        this.addMapPlaceholder(mapContainer);
+    }    loadGoogleMap() {
+        const mapContainer = document.querySelector('.location-map');
+        if (!mapContainer) return;
+
+        const iframe = mapContainer.querySelector('iframe');
+        if (iframe && !iframe.src) {
+            iframe.style.opacity = '0';
+            iframe.style.transition = 'opacity 0.8s ease-out';
+            
+            // Get the map URL from data-src attribute
+            const mapSrc = iframe.dataset.src || iframe.getAttribute('data-original-src');
+            if (mapSrc) {
+                iframe.src = mapSrc;
+                
+                iframe.addEventListener('load', () => {
+                    iframe.style.opacity = '1';
+                    this.removeMapPlaceholder();
+                }, { once: true });
+
+                // Fallback timeout in case iframe fails to load
+                setTimeout(() => {
+                    if (iframe.style.opacity === '0') {
+                        iframe.style.opacity = '1';
+                        this.removeMapPlaceholder();
+                    }
+                }, 5000);
+            } else {
+                // Fallback: remove placeholder if no valid src is found
+                this.removeMapPlaceholder();
+                console.warn('No valid map source found for lazy loading');
+            }
+        }
+    }
+
+    addMapPlaceholder(mapContainer) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'map-placeholder';
+        placeholder.innerHTML = `
+            <div class="map-placeholder-content">
+                <div class="map-icon">📍</div>
+                <div class="map-text">Loading map...</div>
+                <div class="map-shimmer"></div>
+            </div>
+        `;
+        mapContainer.appendChild(placeholder);
+    }
+
+    removeMapPlaceholder() {
+        const placeholder = document.querySelector('.map-placeholder');
+        if (placeholder) {
+            placeholder.style.opacity = '0';
+            setTimeout(() => placeholder.remove(), 500);
+        }
+    }
+
+    setupProgressiveFeatureLoading() {
+        // Delay non-critical features based on user interaction or time
+        const deferredFeatures = [
+            { delay: 1000, feature: () => this.initializeButterflyAnimations() },
+            { delay: 1500, feature: () => this.initializeAdvancedAnimations() },
+            { delay: 2000, feature: () => this.initializePerformanceOptimizations() }
+        ];
+
+        deferredFeatures.forEach(({ delay, feature }) => {
+            setTimeout(feature, delay);
+        });
+
+        // Load features on first interaction
+        const interactionEvents = ['mousedown', 'touchstart', 'keydown', 'scroll'];
+        const handleFirstInteraction = () => {
+            this.initializeInteractiveFeatures();
+            interactionEvents.forEach(event => {
+                document.removeEventListener(event, handleFirstInteraction);
+            });
+        };
+
+        interactionEvents.forEach(event => {
+            document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
+        });
+    }
+
+    initializeButterflyAnimations() {
+        if (window.butterflyManager && !window.butterflyManager.initialized) {
+            window.butterflyManager.init();
+            window.butterflyManager.initialized = true;
+        }
+    }
+
+    initializeAdvancedAnimations() {
+        if (window.entranceAnimationManager && !window.entranceAnimationManager.initialized) {
+            window.entranceAnimationManager.setupAnimations();
+            window.entranceAnimationManager.initialized = true;
+        }
+    }
+
+    initializeInteractiveFeatures() {
+        // Initialize mouse interaction for butterflies with better performance
+        if (window.butterflyManager?.butterflies) {
+            let lastMouseMoveTime = 0;
+            const throttleDelay = 16; // ~60fps
+
+            const throttledMouseMove = (e) => {
+                const now = performance.now();
+                if (now - lastMouseMoveTime < throttleDelay) return;
+                lastMouseMoveTime = now;
+
+                this.handleMouseInteraction(e);
+            };
+
+            document.addEventListener('mousemove', throttledMouseMove, { passive: true });
+        }
+    }
+
+    handleMouseInteraction(e) {
+        if (!window.butterflyManager?.butterflies) return;
+
+        const mouseX = e.clientX;
+        const mouseY = e.clientY + window.pageYOffset;
+
+        window.butterflyManager.butterflies.forEach((butterfly) => {
+            const dx = mouseX - butterfly.x;
+            const dy = mouseY - butterfly.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 75 && distance > 0) {
+                const influenceStrength = ((75 - distance) / 75) * 0.03;
+                butterfly.x -= (dx / distance) * influenceStrength;
+                butterfly.y -= (dy / distance) * influenceStrength;
+            }
+        });
+    }    initializePerformanceOptimizations() {
+        // Reduce animation frequency when page is not visible
+        let animationPaused = false;
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !animationPaused) {
+                animationPaused = true;
+                this.pauseNonEssentialAnimations();
+            } else if (!document.hidden && animationPaused) {
+                animationPaused = false;
+                this.resumeAnimations();
+            }
+        });
+
+        // Optimize animations on slower devices
+        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
+            this.enableLowPerformanceMode();
+        }
+
+        // Add memory pressure monitoring
+        this.monitorMemoryUsage();
+        
+        // Setup performance logging for debugging
+        this.logPerformanceMetrics();
+    }
+
+    monitorMemoryUsage() {
+        if ('memory' in performance) {
+            const checkMemory = () => {
+                const memory = performance.memory;
+                const usedMemory = memory.usedJSHeapSize / 1048576; // Convert to MB
+                const totalMemory = memory.totalJSHeapSize / 1048576;
+                
+                // If memory usage is high, enable low performance mode
+                if (usedMemory > 100 || (usedMemory / totalMemory) > 0.8) {
+                    if (!document.body.classList.contains('low-performance')) {
+                        console.log('High memory usage detected, enabling low performance mode');
+                        this.enableLowPerformanceMode();
+                    }
+                }
+            };
+
+            // Check memory every 30 seconds
+            setInterval(checkMemory, 30000);
+        }
+    }
+
+    logPerformanceMetrics() {
+        if ('performance' in window && 'getEntriesByType' in performance) {
+            setTimeout(() => {
+                const navigationEntries = performance.getEntriesByType('navigation');
+                const paintEntries = performance.getEntriesByType('paint');
+                
+                if (navigationEntries.length > 0) {
+                    const nav = navigationEntries[0];
+                    console.log('🎭 Birthday Website Performance Metrics:');
+                    console.log(`📊 DOM Content Loaded: ${Math.round(nav.domContentLoadedEventEnd)}ms`);
+                    console.log(`🎨 Load Complete: ${Math.round(nav.loadEventEnd)}ms`);
+                }
+
+                if (paintEntries.length > 0) {
+                    paintEntries.forEach(entry => {
+                        console.log(`🖼️ ${entry.name}: ${Math.round(entry.startTime)}ms`);
+                    });
+                }
+
+                // Log lazy loading statistics
+                console.log(`🦋 Lazy Loading Stats:`);
+                console.log(`📷 Total Images: ${this.deferredElements.size}`);
+                console.log(`✅ Loaded Images: ${this.loadedElements.size}`);                console.log(`🌐 Connection Speed: ${this.connectionSpeed}`);
+                console.log(`👤 User Engagement: ${this.userInteractionLevel}`);
+            }, 2000);
+        }
+    }
+
+    // Fallback method for browsers without Intersection Observer
+    setupFallbackLoading() {
+        if (!('IntersectionObserver' in window)) {
+            console.warn('IntersectionObserver not supported, using fallback loading');
+            
+            // Load all images with a delay for older browsers
+            const lazyImages = document.querySelectorAll('.gallery-photo, .dress-code-item img');
+            lazyImages.forEach((img, index) => {
+                setTimeout(() => {
+                    this.loadImageWithAnimation(img);
+                }, index * 500);
+            });
+
+            // Load map after a delay
+            setTimeout(() => {
+                this.loadGoogleMap();
+            }, 3000);
+        }
+    }
+
+    // Error recovery and retry mechanism
+    retryFailedLoads() {
+        const failedImages = document.querySelectorAll('.lazy-error');
+        if (failedImages.length > 0) {
+            console.log(`Retrying ${failedImages.length} failed image loads`);
+            
+            failedImages.forEach((img, index) => {
+                setTimeout(() => {
+                    img.classList.remove('lazy-error');
+                    this.loadImageWithAnimation(img);
+                }, index * 1000);
+            });
+        }
+    }
+
+    pauseNonEssentialAnimations() {
+        document.querySelectorAll('.butterfly').forEach(butterfly => {
+            butterfly.style.animationPlayState = 'paused';
+        });
+    }
+
+    resumeAnimations() {
+        document.querySelectorAll('.butterfly').forEach(butterfly => {
+            butterfly.style.animationPlayState = 'running';
+        });
+    }    enableLowPerformanceMode() {
+        document.body.classList.add('low-performance');
+        
+        // Reduce butterfly count
+        const butterflies = document.querySelectorAll('.butterfly');
+        butterflies.forEach((butterfly, index) => {
+            if (index % 2 === 0) { // Keep every other butterfly
+                butterfly.style.display = 'none';
+            }
+        });
+    }
+
+    setupPrefetching() {
+        // Only prefetch on fast connections and when page is idle
+        if (this.connectionSpeed === 'fast' && 'requestIdleCallback' in window) {
+            const prefetchImages = () => {
+                const visibleImages = document.querySelectorAll('.gallery-photo:not(.lazy-loaded)');
+                visibleImages.forEach((img, index) => {
+                    // Prefetch only the next 2-3 images that are likely to be viewed soon
+                    if (index < 3) {
+                        requestIdleCallback(() => {
+                            const prefetchLink = document.createElement('link');
+                            prefetchLink.rel = 'prefetch';
+                            prefetchLink.href = img.src;
+                            document.head.appendChild(prefetchLink);
+                        });
+                    }
+                });
+            };
+
+            // Start prefetching after initial load
+            setTimeout(prefetchImages, 3000);
+        }
+    }
+
+    setupCriticalResourceHints() {
+        // Add resource hints for critical assets
+        const resourceHints = [
+            { rel: 'dns-prefetch', href: '//www.google.com' },
+            { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+            { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true }
+        ];
+
+        resourceHints.forEach(hint => {
+            if (!document.querySelector(`link[href="${hint.href}"]`)) {
+                const link = document.createElement('link');
+                link.rel = hint.rel;
+                link.href = hint.href;
+                if (hint.crossorigin) link.crossOrigin = hint.crossorigin;
+                document.head.appendChild(link);
+            }
+        });
+    }    setupLoadingPlaceholders() {
+        // Add CSS for placeholders if not already present
+        if (!document.querySelector('#lazy-loading-styles')) {
+            const style = document.createElement('style');
+            style.id = 'lazy-loading-styles';
+            style.textContent = `
+                .lazy-placeholder {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: #f3f4f6;
+                    border-radius: 18px;
+                    overflow: hidden;
+                    z-index: 1;
+                    transition: opacity 0.3s ease;
+                }
+
+                .placeholder-content {
+                    width: 100%;
+                    height: 100%;
+                    position: relative;
+                    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .placeholder-content::before {
+                    content: '🦋';
+                    font-size: 2rem;
+                    opacity: 0.3;
+                    animation: float 2s ease-in-out infinite;
+                }
+
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                }
+
+                .placeholder-shimmer {
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(
+                        90deg,
+                        transparent,
+                        rgba(255, 255, 255, 0.6),
+                        transparent
+                    );
+                    animation: shimmer 1.5s infinite;
+                }
+
+                @keyframes shimmer {
+                    0% { left: -100%; }
+                    100% { left: 100%; }
+                }
+
+                .map-placeholder {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, #f5f3ff, #e9d5ff);
+                    border-radius: 18px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1;
+                    transition: opacity 0.5s ease;
+                }
+
+                .map-placeholder-content {
+                    text-align: center;
+                    color: #8b5cf6;
+                    font-family: 'Fredoka', 'Nunito', sans-serif;
+                }
+
+                .map-icon {
+                    font-size: 3rem;
+                    margin-bottom: 1rem;
+                    animation: mapPulse 2s infinite;
+                }
+
+                .map-text {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    margin-bottom: 1rem;
+                }
+
+                .map-shimmer {
+                    width: 200px;
+                    height: 4px;
+                    background: #e9d5ff;
+                    border-radius: 2px;
+                    overflow: hidden;
+                    position: relative;
+                }
+
+                .map-shimmer::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(
+                        90deg,
+                        transparent,
+                        rgba(139, 92, 246, 0.6),
+                        transparent
+                    );
+                    animation: shimmer 1.5s infinite;
+                }
+
+                @keyframes mapPulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                }
+
+                .lazy-loading {
+                    opacity: 0 !important;
+                    transform: scale(0.95) !important;
+                }
+
+                .lazy-loaded {
+                    opacity: 1 !important;
+                    transform: scale(1) !important;
+                    transition: all 0.6s ease-out !important;
+                }
+
+                .lazy-error {
+                    opacity: 0.5 !important;
+                    filter: grayscale(100%);
+                }
+
+                .low-performance .butterfly {
+                    animation-duration: 20s !important;
+                }
+
+                .low-performance .cloud {
+                    animation-duration: 60s !important;
+                }
+
+                /* Add smooth loading states for better UX */
+                .loading-fade-in {
+                    animation: fadeInUp 0.8s ease-out forwards;
+                }
+
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                /* Network-specific optimizations */
+                .connection-slow .lazy-placeholder {
+                    background: linear-gradient(135deg, #fef7cd, #fbbf24);
+                }                .connection-slow .placeholder-content::before {
+                    content: '⏳';
+                }
+
+                /* Footer butterfly animations */
+                @keyframes gentle-float {
+                    0%, 100% { 
+                        transform: translateY(0px) rotate(0deg); 
+                    }
+                    33% { 
+                        transform: translateY(-8px) rotate(2deg); 
+                    }
+                    66% { 
+                        transform: translateY(-4px) rotate(-1deg); 
+                    }
+                }
+
+                .footer-butterfly {
+                    transition: all 0.3s ease;
+                }
+
+                .footer-butterfly:hover {
+                    transform: scale(1.1) rotate(5deg);
+                }
+
+                /* Content loading animation */
+                .content-loaded {
+                    animation: slideInFromBottom 0.8s ease-out;
+                }
+
+                @keyframes slideInFromBottom {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add connection class for CSS optimizations
+        document.body.classList.add(`connection-${this.connectionSpeed}`);
+          // Setup resource hints
+        this.setupCriticalResourceHints();
+    }
+
+    setupContentLazyLoading() {
+        // Setup lazy loading for non-critical content sections
+        const lazyContentObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    element.classList.add('content-loaded');
+                    
+                    // Load any deferred content
+                    if (element.classList.contains('footer')) {
+                        this.loadFooterContent(element);
+                    }
+                    
+                    lazyContentObserver.unobserve(element);
+                }
+            });
+        }, { rootMargin: '50px' });
+
+        // Observe footer and other non-critical sections
+        const lazyContent = document.querySelectorAll('.footer, .dress-code-container');
+        lazyContent.forEach(element => {
+            lazyContentObserver.observe(element);
+        });
+    }
+
+    loadFooterContent(footer) {
+        // Animate footer butterflies when they come into view
+        const footerButterflies = footer.querySelectorAll('.footer-butterfly');
+        footerButterflies.forEach((butterfly, index) => {
+            setTimeout(() => {
+                butterfly.style.animation = 'gentle-float 3s ease-in-out infinite';
+                butterfly.style.animationDelay = `${index * 0.5}s`;            }, index * 200);
+        });
+    }
+
+    trackUserEngagement() {
+        let interactionCount = 0;
+        let scrollDepth = 0;
+        
+        const trackInteraction = () => {
+            interactionCount++;
+            if (interactionCount > 5) {
+                this.userInteractionLevel = 'high';
+                this.adjustLoadingStrategy();
+            }
+        };
+
+        const trackScroll = () => {
+            const currentScrollDepth = (window.pageYOffset / (document.body.scrollHeight - window.innerHeight)) * 100;
+            if (currentScrollDepth > scrollDepth) {
+                scrollDepth = currentScrollDepth;
+                if (scrollDepth > 50) {
+                    this.userInteractionLevel = 'engaged';
+                    this.prioritizeRemainingContent();
+                }
+            }
+        };
+
+        // Track various user interactions
+        ['click', 'touch', 'keydown'].forEach(event => {
+            document.addEventListener(event, trackInteraction, { passive: true });
+        });
+
+        document.addEventListener('scroll', trackScroll, { passive: true });
+    }
+
+    adjustLoadingStrategy() {
+        if (this.userInteractionLevel === 'high' && this.connectionSpeed === 'fast') {
+            // Aggressively preload remaining content
+            const unloadedImages = document.querySelectorAll('.gallery-photo:not(.lazy-loaded)');
+            unloadedImages.forEach((img, index) => {
+                if (index < 5) { // Preload next 5 images
+                    setTimeout(() => this.loadImageWithAnimation(img), index * 100);
+                }
+            });
+        }
+    }
+
+    prioritizeRemainingContent() {
+        // Load map and footer content if user is engaged
+        const mapContainer = document.querySelector('.location-map');
+        if (mapContainer && !mapContainer.querySelector('iframe').src) {
+            this.loadGoogleMap();
         }
     }
 }
