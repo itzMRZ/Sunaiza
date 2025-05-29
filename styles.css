@@ -9,7 +9,7 @@
 html, body {
     width: 100%; /* Use 100% instead of 100vw to avoid issues with scrollbars */
     min-height: 100vh;
-    overflow-x: hidden !important; /* Added !important for emphasis */
+    overflow-x: hidden !important; /* Reinforced */
     font-family: 'Nunito', sans-serif;
     color: var(--text-color);
     background-color: var(--background-start);
@@ -27,14 +27,14 @@ html {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scroll-padding-top: 20px;
-    width: 100%; /* Ensure html takes full width */
-    overflow-x: hidden; /* Prevent horizontal scroll at the html level */
+    width: 100%;
+    overflow-x: hidden !important; /* Reinforced */
 }
 
 body {
     background: linear-gradient(135deg, #F3E8FF 0%, #E0F2FE 50%, #F3E8FF 100%); /* Purple themed gradient */
     background-attachment: fixed;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden !important; /* Reinforced */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -94,6 +94,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    width: 100%; /* Ensure container takes full width available from body */
+    overflow-x: hidden; /* Prevent internal overflow from affecting layout */
 }
 
 .header {

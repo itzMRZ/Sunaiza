@@ -1,16 +1,17 @@
 // Create clouds
 const cloudsContainer = document.getElementById('clouds');
 if (cloudsContainer) {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) { // Increased from 10 to 20 clouds
         const cloud = document.createElement('div');
         cloud.className = 'cloud';
-        const size = Math.random() * 100 + 50;
+        const size = Math.random() * 120 + 60; // Slightly larger max size, min size 60
         cloud.style.width = size + 'px';
         cloud.style.height = size/2 + 'px';
         cloud.style.left = Math.random() * 100 + '%';
-        cloud.style.top = Math.random() * 50 + '%';
-        cloud.style.animationDuration = (Math.random() * 20 + 20) + 's';
-        cloud.style.animationDelay = (Math.random() * 10) + 's';
+        cloud.style.top = Math.random() * 60 + '%'; // Spread them out a bit more vertically
+        cloud.style.animationDuration = (Math.random() * 40 + 30) + 's'; // Slower: 30s to 70s duration
+        cloud.style.animationDelay = (Math.random() * 20) + 's'; // Increased delay range
+        cloud.style.opacity = 0.6 + Math.random() * 0.3; // Vary opacity for subtlety (0.6 to 0.9)
         cloudsContainer.appendChild(cloud);
     }
 }
@@ -167,7 +168,7 @@ class ButterflyManager {
                 rotation: Math.random() * 360,
                 scale: 0.04 + Math.random() * 0.03, // Scale (0.04 to 0.07) - slightly increased max
                 lastDirectionChange: Date.now() - Math.random() * 12000,
-                directionChangeInterval: 12000 + Math.random() * 10000, // Change 12-22 seconds - increased interval
+                directionChangeInterval: 12000 + Math.random() * 10000 // Change 12-22 seconds - increased interval
             };
             this.positionButterfly(butterfly);
             butterfly.element.style.opacity = '1'; // Make butterfly visible after initial setup
@@ -249,21 +250,17 @@ class ButterflyManager {
         if (butterfly.x < margin) {
             butterfly.x = margin; // Place at margin
             butterfly.centerX = vpWidth * (0.2 + Math.random() * 0.6); // Pick new center more towards the other side
-            // butterfly.currentDirection *= -1; // Optionally reverse direction
         } else if (butterfly.x > vpWidth - margin) {
             butterfly.x = vpWidth - margin; // Place at margin
             butterfly.centerX = vpWidth * (0.2 + Math.random() * 0.6); // Pick new center more towards the other side
-            // butterfly.currentDirection *= -1;
         }
 
         if (butterfly.y < margin) {
             butterfly.y = margin;
             butterfly.centerY = vpHeight * (0.2 + Math.random() * 0.6);
-            // butterfly.currentDirection *= -1;
         } else if (butterfly.y > vpHeight - margin) {
             butterfly.y = vpHeight - margin;
             butterfly.centerY = vpHeight * (0.2 + Math.random() * 0.6);
-            // butterfly.currentDirection *= -1;
         }
 
         // Ensure orbital centers also stay roughly within viewport to guide butterflies back
