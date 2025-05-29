@@ -4,6 +4,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box; /* Apply border-box to all elements */
+    /* max-width: 100%; */ /* Removed this - was too aggressive */
 }
 
 html, body {
@@ -39,6 +40,7 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%; /* Ensure body takes full width */
+    position: relative; /* Ensure body has a positioning context */
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     touch-action: manipulation;
@@ -94,9 +96,16 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    width: 100%; /* Ensure container takes full width available from body */
-    overflow-x: hidden; /* Prevent internal overflow from affecting layout */
+    /* width: 100%; Ensure container takes full width available from body */ /* Reverted */
+    /* overflow-x: hidden; Prevent internal overflow from affecting layout */ /* Reverted */
 }
+
+/* Temporary debug style - uncomment to diagnose overflow */
+/*
+body > * {
+    border: 1px solid red !important;
+}
+*/
 
 .header {
     text-align: center;
@@ -251,7 +260,7 @@ body {
     max-width: 650px;
     border: 3px solid #A78BFA;
     animation: fadeInUp 0.8s ease-out 0.4s both;
-    transform: rotate(-0.5deg);
+    /* transform: rotate(-0.5deg); */ /* Temporarily commented out */
 }
 
 /* New styles for Date and Time boxes */
@@ -691,7 +700,7 @@ body {
     overflow: visible; /* Allow shadows to be seen */
     position: relative;
     border: 3px solid #A78BFA;
-    transform: rotate(0.5deg);
+    /* transform: rotate(0.5deg); */ /* Temporarily commented out */
 }
 
 .dress-code-container::before {
